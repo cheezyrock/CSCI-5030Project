@@ -4,6 +4,7 @@ class Narrative:
         self.choices = []
         
     def getStory(self):
+        
         return self.story
     
     def getChoices(self):
@@ -18,4 +19,5 @@ class Narrative:
             self.choices.remove(playerDecision)
         else:
             raise ValueError("This decision is not found in the list of choices")
+        
         

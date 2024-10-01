@@ -4,6 +4,7 @@ class Decision:
         self.nextStory = nextStory
         
     def getPlayerChoice(self):
+        
         return self.playerChoice
     
     def getNextStory(self):
