@@ -3,12 +3,12 @@ class Player:
     def __init__(self, name: str):
         self.name = name
         self.decisions = []  
-        self.decisionPoints = 0  
-
-    def addDecision(self, decision: 'Decision'):
-        from Decision import Decision
-        self.decisions.append(decision)
-
+        self.decisionPoints = 0 
+    
+    def addDecision(self, storyNode: 'StoryNode'):
+       # from Decision import Decision
+        self.decisions.append(storyNode)
+        
     def getDecisions(self):
         return self.decisions
 

@@ -29,7 +29,8 @@ class ChoiceType(Enum):
     positive = 1
     negative = 2
     positiveHarmful = 3
-    negativehelpful = 4class Narrative:
+    negativehelpful = 4
+class Narrative:
     def __init__(self, narrativeText: str):
         self.story = narrativeText
         self.choices = []
