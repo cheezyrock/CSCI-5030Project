@@ -4,3 +4,7 @@
 /[Bb]uild/
 
 .vs/
+
+
+__pychache__/
+*.pyc
