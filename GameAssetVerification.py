@@ -7,25 +7,29 @@ import os
 class GameAssetVerification:
 	def __init__(self):
 		self.filepath = os.path.realpath(__file__) + "/GameAssets"
-		self.manifestLocalPath = filePath + "/manifest.json"
+		self.manifestLocalPath = self.filePath + "/manifest.json"
 		self.manifestRemoteLink = "https://drive.google.com/file/d/1y-tB0zZSu-rWO1Arx0xBb_V1g9FuniLc/"
-		self.localManifest = list[AssetManifestObject]
-		self.remoteManifest = list[AssetManifestObject]
+		self.localManifest : list[AssetManifestObject] = []
+		self.remoteManifest :  list[AssetManifestObject] = []
 
-	def Verify():
-		checkLocalPaths()
-		loadManifests()
+	def verify(self):
+		self.checkLocalPaths()
+		self.loadManifests()
 
-		changeList = compareManifest()
+		changeList = self.compareManifest()
 
-		updateFiles(changeList)
+		self.updateFiles(changeList)
 
 
-	def checkLocalPaths():
+	def createManifest():
+		#Create a new Manifest based on the files in a local directory, push that to the remote server
+		pass
+
+	def checkLocalPaths(self):
 		if not os.path.exists(self.filepath):
 			os.makedirs(self.filepath)
 
-	def loadManifests():
+	def loadManifests(self):
 		#local
 		if os.path.isfile(self.manifestLocalPath):
 			with open(self.manifestLocalPath) as manFile:
@@ -40,13 +44,12 @@ class GameAssetVerification:
 		filestream.write(remoteMan)
 		filestream.close()
 
-
 		with open(self.manifestLocalPath) as manFile:
-				jdata = json.load(manFile)
+			jdata = json.load(manFile)
 			for a in jdata:
 				self.remoteManifest.append(AssetManifestObject(a['fileName'], a['path'], a['fileSize'], a['fileDate'], a['remoteLink']))
 
-	def compareManifest() -> list[str]:
+	def compareManifest(self) -> list[str]:
 		retList = []
 		for a in self.remotemanifest:
 			if a not in self.localManifest:
@@ -54,7 +57,7 @@ class GameAssetVerification:
 
 		return retList
 
-	def updateFiles(changeList: list[AssetManifestObject]):
+	def updateFiles(self, changeList):
 		for a in changeList:
 			#download remote file
 			#replace existing files if necessary
