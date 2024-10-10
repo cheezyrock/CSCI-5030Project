@@ -10,14 +10,17 @@ import os
 import playsound
 
 class BGM:
-    def playBGM():
+    def playBGM(filename : str  = 'Mysteriousproblem.mp3'):
         filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
-        if (os.path.exists(filepath) and filename != ""):
+        if (os.path.exists(filepath) and filename != ''):
             playsound.playsound(filepath, False)
 
 
 class SFX:
-    def playSFX(filename: str = "", asyncronous: bool = True):
+    def playSFX(filename: str = '', asyncronous: bool = True):
         filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
-        if (os.path.exists(filepath) and filename != ""):
+        if (os.path.exists(filepath) and filename != ''):
             playsound.playsound(filepath, not asyncronous)
+
+print('test')
+SFX.playSFX('ButtonPress.wav')
