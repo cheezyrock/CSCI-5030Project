@@ -3,11 +3,10 @@ from datetime import date
 import json
 import os
 
-
 class GameAssetVerification:
 	def __init__(self):
-		self.filepath = os.path.realpath(__file__) + "/GameAssets"
-		self.manifestLocalPath = self.filePath + "/manifest.json"
+		self.filepath = os.path.join(os.getcwd(), "/GameAssets")
+		self.manifestLocalPath = os.path.join(self.filePath, "/manifest.json")
 		self.manifestRemoteLink = "https://drive.google.com/file/d/1y-tB0zZSu-rWO1Arx0xBb_V1g9FuniLc/"
 		self.localManifest : list[AssetManifestObject] = []
 		self.remoteManifest :  list[AssetManifestObject] = []
@@ -59,6 +58,7 @@ class GameAssetVerification:
 
 	def updateFiles(self, changeList):
 		for a in changeList:
+			pass
 			#download remote file
 			#replace existing files if necessary
 
