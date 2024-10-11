@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import Audio
 
 class StoryNode:
     def __init__(self, text, choices):
@@ -21,6 +22,8 @@ class Game:
 
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=20)
+
+        Audio.BGM.playBGM();
 
         self.play()
 
@@ -89,6 +92,7 @@ class Game:
             self.root.quit()
 
     def make_choice(self, index):
+        Audio.SFX.playSFX("ButtonPress.wav")
         self.current_node = self.current_node.choices[index]
         self.display_choices()
 

@@ -21,6 +21,3 @@ class SFX:
         filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
         if (os.path.exists(filepath) and filename != ''):
             playsound.playsound(filepath, not asyncronous)
-
-print('test')
-SFX.playSFX('ButtonPress.wav')
