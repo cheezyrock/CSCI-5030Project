@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
+from PIL import Image, ImageTk
 
 class StoryNode:
-    def __init__(self, text, choices):
+    def __init__(self, text, choices, image_path=None):
         self.text = text
         self.choices = choices
+        self.image_path = image_path
 
 class Game:
     def __init__(self):
@@ -22,6 +24,10 @@ class Game:
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=20)
 
+        self.image_label = tk.Label(self.root)
+        self.image_label.pack()
+        
+        
         self.play()
 
         self.root.mainloop()
@@ -32,8 +38,8 @@ class Game:
 
         # Story nodes
         choice_6 = StoryNode("You are at the edge of the forest. What do you do?", [
-            StoryNode("Go back", [end_node]),
-            StoryNode("Jump from the edge", [end_node]),
+            StoryNode("Go back", [end_node], "images/explore.jpeg"),
+            StoryNode("Jump from the edge", [end_node], "images/camp site.jpeg"),
         ])
 
         choice_5 = StoryNode("A wise man offers potions. Which do you choose?", [
@@ -55,21 +61,21 @@ class Game:
         ])
 
         choice_2 = StoryNode("You find a map. What now?", [
-            StoryNode("Follow it.", [choice_3]),
-            StoryNode("Ignore it.", [choice_3]),
-            StoryNode("Burn it.", [end_node])
+            StoryNode("Follow it.", [choice_3],"./Images/map-follow.png"),
+            StoryNode("Ignore it.", [choice_3],"./Images/map-ignore.png"),
+            StoryNode("Burn it.", [end_node],"./Images/map-burn.png" )
         ])
 
         choice_1 = StoryNode("You awaken in a strange land. What next?", [
-            StoryNode("Explore.", [choice_2]),
-            StoryNode("Seek help.", [choice_2]),
-            StoryNode("Camp.", [end_node])
-        ])
+            StoryNode("Explore.", [choice_2],"./Images/exploring.png"),
+            StoryNode("Seek help.", [choice_2],"./Images/seek-help.png"),
+            StoryNode("Camp.", [end_node],"./Images/camping.png")
+        ],"./Images/lush-garden.jpeg")
 
         # Starting point
         start_node = StoryNode("You find yourself in a lush, unfamiliar land.", [
             choice_1,
-        ])
+        ], "./Images/start-image.png")
 
         return start_node
 
@@ -79,6 +85,9 @@ class Game:
             widget.destroy()
 
         self.story_text.set(self.current_node.text)
+        
+        if self.current_node.image_path:
+            self.display_image(self.current_node.image_path)
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
@@ -87,6 +96,13 @@ class Game:
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
+            
+    def display_image(self, image_path):
+            img = Image.open(image_path)
+            img = img.resize((300, 300), Image.Resampling.LANCZOS)
+            img = ImageTk.PhotoImage(img)
+            self.image_label.config(image=img)
+            self.image_label.image = img
 
     def make_choice(self, index):
         self.current_node = self.current_node.choices[index]
