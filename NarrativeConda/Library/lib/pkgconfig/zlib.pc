@@ -1,0 +1,13 @@
+prefix=D:/Anaconda/envs/NarrativeConda/Library
+exec_prefix=D:/Anaconda/envs/NarrativeConda/Library
+libdir=D:/Anaconda/envs/NarrativeConda/Library/lib
+sharedlibdir=D:/Anaconda/envs/NarrativeConda/Library/lib
+includedir=D:/Anaconda/envs/NarrativeConda/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
