@@ -44,7 +44,7 @@ class GameIntegration:
         #calls the decision manager method to handle decision
         self.decision_manager.override_decision(group_decision)
         
-        # Award points to players basde on their last decision
+        # Award points to players based on their last decision
         for player in self.players:
             if player.last_decision != group_decision:
                 player.award_dp()
