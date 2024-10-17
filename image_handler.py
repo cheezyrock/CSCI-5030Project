@@ -1,30 +1,15 @@
-#import tkinter as tk
-#from PIL import Image, ImageTk
-#
-#def display_jpeg_image(image_path, width,height):
-#    root = tk.Tk()
-#    root.title("JPEG Image Display")
-#
-#    img = Image.open(image_path)
-#    img = img.resize((width, height), Image.Resampling.LANCZOS)
-#
-#    img = ImageTk.PhotoImage(img)
-#
-#    label = tk.Label(root, image=img)
-#    label.pack()
-#
-#
-#    root.mainloop()
-#
-## Example usage
-#display_jpeg_image("./Images/map.png", 300,300)
-# image_handler.py
+import os
+from pickle import NONE
+
 
 from PIL import Image, ImageTk
-
 class ImageHandler:
     @staticmethod
-    def load_image(image_path, size=(300, 300)):
-        img = Image.open(image_path)
-        img = img.resize(size, Image.Resampling.LANCZOS)
-        return ImageTk.PhotoImage(img)
+    def load_image(image_name, size=(300,300)):
+        filepath = os.path.join(os.getcwd(), 'GameAssets', 'Images', image_name)
+        if (os.path.exists(filepath) and image_name != ''):
+            img = Image.open(filepath)
+            img = img.resize(size, Image.Resampling.LANCZOS)
+            return ImageTk.PhotoImage(img)
+
+        return NONE

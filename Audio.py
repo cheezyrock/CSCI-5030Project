@@ -9,6 +9,7 @@
 import os
 import playsound
 
+
 class BGM:
     def playBGM(filename : str  = 'Mysteriousproblem.mp3'):
         filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
