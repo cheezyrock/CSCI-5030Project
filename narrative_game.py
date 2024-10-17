@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
-import Audio
+from image_handler import ImageHandler
+#import Audio
 
 class StoryNode:
     def __init__(self, text, choices, image_path=None):
@@ -27,7 +28,7 @@ class Game:
 
         self.image_label = tk.Label(self.root)
         self.image_label.pack()
-        Audio.BGM.playBGM();
+        #Audio.BGM.playBGM()
         
         self.play()
 
@@ -100,13 +101,13 @@ class Game:
             
     def display_image(self, image_path):
             img = Image.open(image_path)
-            img = img.resize((300, 300), Image.Resampling.LANCZOS)
+            img = img.resize((700, 700), Image.Resampling.LANCZOS)
             img = ImageTk.PhotoImage(img)
             self.image_label.config(image=img)
             self.image_label.image = img
 
     def make_choice(self, index):
-        Audio.SFX.playSFX("ButtonPress.wav")
+        #Audio.SFX.playSFX("ButtonPress.wav")
         self.current_node = self.current_node.choices[index]
         self.display_choices()
 
