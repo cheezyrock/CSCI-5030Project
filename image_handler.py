@@ -5,3 +5,4 @@ class ImageHandler:
         img = Image.open(image_path)
         img = img.resize(size, Image.Resampling.LANCZOS)
         return ImageTk.PhotoImage(img)
+
