@@ -13,4 +13,4 @@ A python environment will need to be setup in order to run the code.  The follow
 **playsound** version 1.2.2 (pip install playsound==1.2.2)
 
 
-
+A pre-made Conda environment with all necessary packages installed can be found in the NarrativeConda folder.  This may or may not work depending on how your python is set up and what tools you are using to manage your environments
