@@ -9,7 +9,7 @@ Confirm python is on your computer. Download all associated files. Run the "Main
 ## How to setup any initial configuration?
 A python environment will need to be setup in order to run the code.  The following packages need to be installed on the environment in order for it to function:
 
-**Pillow** (pip install Pillow)
+**Pillow** (pip install Pillow)<br>
 **playsound** version 1.2.2 (pip install playsound==1.2.2)
 
 
