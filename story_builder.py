@@ -8,7 +8,7 @@ class StoryBuilder:
 
         # Story nodes
         choice_6 = StoryNode("You are at the edge of the forest. What do you do?", [
-            StoryNode("Go back", [end_node], "images/turn-back-forest.jpeg"),
+            StoryNode("Go back", [end_node], "./Images/turn-back-forest.jpeg"),
             StoryNode("Jump from the edge", [end_node], "./Images/jump-forest.jpeg"),
         ], "./Images/forest-edge.jpeg")
 
