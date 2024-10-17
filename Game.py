@@ -24,6 +24,7 @@ import tkinter as tk
 from tkinter import messagebox
 from story_builder import StoryBuilder
 from image_handler import ImageHandler
+import Audio
 
 class Game:
     def __init__(self):
@@ -44,6 +45,7 @@ class Game:
         self.image_label = tk.Label(self.root)
         self.image_label.pack()
 
+        Audio.BGM.playBGM()
         self.play()
         self.root.mainloop()
 
@@ -69,6 +71,7 @@ class Game:
 
     def make_choice(self, index):
         self.current_node = self.current_node.choices[index]
+        Audio.SFX.playSFX("ButtonPress.wav")
         self.display_choices()
 
     def play(self):
