@@ -1,3 +1,5 @@
+from os import path
+
 from PIL import Image, ImageTk
 class ImageHandler:
     @staticmethod
