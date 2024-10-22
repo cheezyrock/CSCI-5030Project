@@ -8,17 +8,20 @@
 
 import os
 import playsound
+GAME_ASSET_PATH = os.path.join(os.getcwd(), 'GameAssets')
 
 
 class BGM:
     def playBGM(filename : str  = 'Mysteriousproblem.mp3'):
-        filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
-        if (os.path.exists(filepath) and filename != ''):
+        filepath = os.path.join(GAME_ASSET_PATH, filename)
+        if os.path.exists(filepath):
             playsound.playsound(filepath, False)
 
 
 class SFX:
-    def playSFX(filename: str = '', asyncronous: bool = True):
-        filepath = os.path.join(os.getcwd(), 'GameAssets', filename)
-        if (os.path.exists(filepath) and filename != ''):
+    def playSFX(filename: str = None, asyncronous: bool = True):
+        if filename is None:
+            raise ValueError("Filename must be provided")
+        filepath = os.path.join(GAME_ASSET_PATH, filename)
+        if os.path.exists(filepath):
             playsound.playsound(filepath, not asyncronous)
