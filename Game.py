@@ -71,7 +71,7 @@ class Game:
 
     def make_choice(self, index):
         self.current_node = self.current_node.choices[index]
-        Audio.SFX.playSFX("ButtonPress.wav")
+        Audio.SFX.playSFX("ButtonPress.mp3")
         self.display_choices()
 
     def play(self):
