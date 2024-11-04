@@ -41,10 +41,10 @@ class GameIntegration:
         self.decision_manager = decision_manager
         
     def handle_group_decision(self, group_decision):
-        #calls the decision manager method to handle decision
+        # calls the decision manager method to handle decision
         self.decision_manager.override_decision(group_decision)
         
-        # Award points to players based on their last decision
+        # award points to players based on their last decision
         for player in self.players:
             if player.last_decision != group_decision:
                 player.award_dp()
