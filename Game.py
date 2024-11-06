@@ -154,5 +154,5 @@ class Game:
         # Here you can add logic to stop the server or close any active connections if necessary
         # For example, if you are running a server, you should properly stop it before quitting
 
-if __name__ == "__main__":
-    game = Game()
+#if __name__ == "__main__":
+ #   game = Game()
