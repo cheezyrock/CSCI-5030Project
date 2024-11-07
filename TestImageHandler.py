@@ -14,7 +14,7 @@ class TestImageHandler(unittest.TestCase):
         self.root.destroy()
 
     def test_load_image(self):
-        story_node = StoryNode("Test text", [], "./Images/lush-garden.jpeg")
+        story_node = StoryNode("Test text", [], "lush-garden.jpeg")
         image_path = story_node.image_path
         try:
             img = ImageHandler.load_image(image_path)
