@@ -27,10 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run python test script
+      - name: Run python Decision test script
         run: |
           python -m unittest TestCases.py
       
-      - name: Run python test script
+      - name: Run python ImageHandler test script
         run: |
-          python -m unittest TestImageHandle.py
+          python -m unittest TestImageHandler.py
