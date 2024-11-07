@@ -5,9 +5,11 @@ name: Honeycutt-testing
 
 on:
   push:
-    branches: [ "Honeycutt-Working" ]
+    branches:
+      - 'Honeycutt-Working'
   pull_request:
-    branches: [ "Honeycutt-Working" ]
+    branches: 
+      - 'Honeycutt-Working'
 
 permissions:
   contents: read
