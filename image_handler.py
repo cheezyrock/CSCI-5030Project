@@ -1,7 +1,4 @@
 import os
-from pickle import NONE
-
-
 from PIL import Image, ImageTk
 class ImageHandler:
     @staticmethod
@@ -12,4 +9,4 @@ class ImageHandler:
             img = img.resize(size, Image.Resampling.LANCZOS)
             return ImageTk.PhotoImage(img)
 
-        return NONE
+        return None 

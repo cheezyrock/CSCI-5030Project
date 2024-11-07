@@ -1,7 +1,8 @@
 
-from datetime import date
 import json
 import os
+import requests
+
 
 class GameAssetVerification:
 	def __init__(self):
@@ -61,6 +62,19 @@ class GameAssetVerification:
 			pass
 			#download remote file
 			#replace existing files if necessary
+
+	def DownloadFile(self, fileID):
+
+		response = requests.get(self.manifestRemoteLink, stream=True)
+
+		if response.status_code == 200:
+			pass
+
+		else:
+			pass
+
+	def UploadFile(self, fileID):
+		pass
 
 class AssetManifestObject:
 	def __init__(self, fileName: str, path: str, fileSize: int, fileDate: date, remoteLink: str):
