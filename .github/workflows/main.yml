@@ -30,3 +30,7 @@ jobs:
       - name: Run python test script
         run: |
           python -m unittest TestCases.py
+      
+      - name: Run python test script
+        run: |
+          python -m unittest TestImageHandle.py
