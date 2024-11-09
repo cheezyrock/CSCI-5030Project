@@ -29,16 +29,9 @@ jobs:
           pip install Pillow
           pip install playsound==1.2.2
 
-          
-      - name: Set up virtual display
-        run: |
-          sudo apt-get install -y xvfb
-          Xvfb :99 -ac &
-          export DISPLAY=:99
-
       - name: Run python Decision test script
         run: |
-          python -m unittest discover
+           xvfb-run python -m unittest discover
       
      # - name: Run python ImageHandler test script
      #   run: |
