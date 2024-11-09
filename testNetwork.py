@@ -6,6 +6,7 @@ from unittest.mock import patch
 from Game import Game
 
 class TestGame(unittest.TestCase):
+   
     @patch("Game.Game.start_host_server", autospec=True)
     def test_host_game(self, mock_start_host_server):
         game = Game()
