@@ -1,5 +1,6 @@
 import os
 from PIL import Image, ImageTk
+
 class ImageHandler:
     @staticmethod
     def load_image(image_name, size=(300,300)):
@@ -9,4 +10,4 @@ class ImageHandler:
             img = img.resize(size, Image.Resampling.LANCZOS)
             return ImageTk.PhotoImage(img)
 
-        return None 
+        return None
