@@ -14,3 +14,5 @@ A python environment will need to be setup in order to run the code.  The follow
 
 
 A pre-made Conda environment with all necessary packages installed can be found in the NarrativeConda folder.  This may or may not work depending on how your python is set up and what tools you are using to manage your environments
+
+Note: Testing for NarrativeConda is still pending. Please try it out and add feedback to ensure everything works smoothly.
