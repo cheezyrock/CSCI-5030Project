@@ -5,7 +5,6 @@ import threading
 from tkinter import messagebox
 import socket
 from pathlib import Path
-from xmlrpc.client import _HostType
 
 # Directory for storing files and manifest
 gameAssetsDirectory = os.path.join(os.path.split(os.path.abspath(__file__))[0], "GameAssets")
@@ -75,16 +74,20 @@ class P2PNetwork:
 
     async def SynchronizeFiles(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         
-        localManifest = self.LoadLocalManfest()
-        remoteManifest = await self.ReceiveManifest(reader)
+        lm = self.LoadLocalManfest()
+        rm = await self.ReceiveManifest(reader)
         
-        for fileName, fileSize in remoteManifest.items():
+        await self.TransferFiles(lm, rm, reader, writer)
+
+    async def TransferFiles (self, lm, rm, reader, writer):
+
+        for fileName, fileSize in rm.items():
             filePath = os.path.join(gameAssetsDirectory, fileName)
-            if fileName not in localManifest or localManifest[fileName] != fileSize:
+            if fileName not in lm or lm[fileName] != fileSize:
                 await self.DownloadFile(fileName, reader, writer)
         
-        for fileName, local_size in localManifest.items():
-            if fileName not in remoteManifest or remoteManifest[fileName] != local_size:
+        for fileName, local_size in lm.items():
+            if fileName not in rm or rm[fileName] != local_size:
                 await self.UploadFile(fileName, reader, writer)
 
 
