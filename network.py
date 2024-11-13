@@ -37,23 +37,10 @@ class P2PNetwork:
         writer.write(self.current_node.text.encode())
         await writer.drain()
 
-    def show_ip_entry(self):
-        """Show the IP entry fields when joining a game."""
-        self.ip_label.pack(pady=10)
-        self.ip_entry.pack(pady=10)
-        self.ip_submit_button.pack(pady=10)
-        self.remove_main_buttons()  # Remove Host and Join buttons
-
-    def join_game(self):
+    def join_game(self, peer_ip):
         """Allow the user to input a host's IP and connect to an existing game."""
-        peer_ip = self.ip_entry.get()
         if peer_ip:
             threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
-            print(f"Attempting to join game at {peer_ip}...")
-            self.ip_label.pack_forget()  # Hide input after submitting
-            self.ip_entry.pack_forget()
-            self.ip_submit_button.pack_forget()
-            self.remove_main_buttons()  # Remove Host and Join buttons
         else:
             messagebox.showerror("Error", "Please enter a valid IP address.")
 
@@ -62,6 +49,9 @@ class P2PNetwork:
         try:
             reader, writer = await asyncio.wait_for( 
                 asyncio.open_connection(host, port), timeout=10)
+            
+            await self.SynchronizeFiles(reader, writer)
+
             game_intro = await reader.read(100)  # Receive initial story data
             self.story_text.set(game_intro.decode())
             self.display_choices()  # Show the story after joining

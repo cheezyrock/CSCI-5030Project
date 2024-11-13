@@ -41,7 +41,7 @@ class Game:
         global network 
         network = network.P2PNetwork()
         self.host_button = tk.Button(self.root, text="Host Game", command=network.host_game, width=20)
-        self.join_button = tk.Button(self.root, text="Join Game", command=network. show_ip_entry, width=20)
+        self.join_button = tk.Button(self.root, text="Join Game", command=self.show_ip_entry, width=20)
         
         self.host_button.pack(side=tk.TOP, pady=10)
         self.join_button.pack(side=tk.TOP, pady=10)
@@ -49,7 +49,7 @@ class Game:
         # Create an IP address entry field (hidden by default)
         self.ip_label = tk.Label(self.root, text="Enter Host IP Address:")
         self.ip_entry = tk.Entry(self.root, width=20)
-        self.ip_submit_button = tk.Button(self.root, text="Join", command=network.join_game)
+        self.ip_submit_button = tk.Button(self.root, text="Join", command=self.join_game)
 
         self.ip_label.pack_forget()  # Hide initially
         self.ip_entry.pack_forget()  # Hide initially
@@ -94,6 +94,13 @@ class Game:
         self.host_button.pack_forget()
         self.join_button.pack_forget()
 
+    def show_ip_entry(self):
+        """Show the IP entry fields when joining a game."""
+        self.ip_label.pack(pady=10)
+        self.ip_entry.pack(pady=10)
+        self.ip_submit_button.pack(pady=10)
+        self.remove_main_buttons()  # Remove Host and Join buttons
+
     def on_close(self):
         """Terminate the game server when closing the window."""
         print("Closing the game...")
@@ -107,6 +114,16 @@ class Game:
         print("Hosting game...")
         self.remove_main_buttons()  # Remove Host and Join buttons
         self.start_game()
+
+    def join_game(self):
+        peer_ip = self.ip_entry.get()
+        print(f"Attempting to join game at {peer_ip}...")
+        self.ip_label.pack_forget()  # Hide input after submitting
+        self.ip_entry.pack_forget()
+        self.ip_submit_button.pack_forget()
+        self.remove_main_buttons()  # Remove Host and Join buttons
+        network.join_game(peer_ip)
+
 
     ## P2P Networking Methods
     #def host_game(self):
