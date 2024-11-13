@@ -135,10 +135,13 @@ class Game:
     async def connect_to_host(self, host, port):
         """Connect to an existing game hosted by another player."""
         try:
-            reader, writer = await asyncio.open_connection(host, port)
+            reader, writer = await asyncio.wait_for( 
+                asyncio.open_connection(host, port), timeout=10)
             game_intro = await reader.read(100)  # Receive initial story data
             self.story_text.set(game_intro.decode())
             self.display_choices()  # Show the story after joining
+        except ConnectionRefusedError:
+            messagebox.showerror("Connection Error","No game hosted at the provided IP address.")
         except Exception as e:
             messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
 

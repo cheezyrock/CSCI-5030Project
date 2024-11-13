@@ -29,5 +29,7 @@ class P2PNetwork:
             reader, writer = await asyncio.open_connection(host, port)
             self.peers.append((reader, writer))
             print(f"Connected to game at {host}:{port}")
+        except ConnectionRefusedError:
+            print(f"Failed to connect to {host}:{port} - No game hosted.")
         except Exception as e:
             print(f"Failed to connect to {host}:{port} - {e}")
