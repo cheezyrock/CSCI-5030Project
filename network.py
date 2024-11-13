@@ -5,18 +5,25 @@ import threading
 from tkinter import messagebox
 import socket
 from pathlib import Path
+from xmlrpc.client import _HostType
 
 # Directory for storing files and manifest
 gameAssetsDirectory = os.path.join(os.path.split(os.path.abspath(__file__))[0], "GameAssets")
 localManifest = os.path.join(gameAssetsDirectory, "manifest.json")
 
 class P2PNetwork:
+    def __init__(self):
+        self.peers: list[tuple[asyncio.StreamReader, asyncio.StreamWriter]] = []
+
 
     # P2P Networking Methods
     def host_game(self):
         """Host a new game and start listening for incoming connections."""
         threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
         print("Hosting game...")
+        if not os.path.exists(localManifest):
+            self.GenerateManifest()
+        
         self.LoadLocalManfest()
 
     def start_game(self):
@@ -32,8 +39,11 @@ class P2PNetwork:
 
     async def handle_client(self, reader, writer):
         """Handle incoming client connections and share game data."""
+        self.peers.append((reader,writer))
         print("A player has connected.")
         # Send the initial game state to the connected player
+        await self.SynchronizeFiles()
+
         writer.write(self.current_node.text.encode())
         await writer.drain()
 
@@ -133,7 +143,7 @@ class P2PNetwork:
             with open(localManifest, 'r') as man:
                 return json.load(man)
             
-        return self.GenerateManifest()
+        return {}
 
 
     def SaveLocalManifest(self, manifest: list):
