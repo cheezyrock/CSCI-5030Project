@@ -5,11 +5,10 @@ import threading
 from tkinter import messagebox
 import socket
 from pathlib import Path
-from typing import List
 
 # Directory for storing files and manifest
-gameAssetsDirectory = os.path.join(os.getcwd(), "/GameAssets")
-localManifest = os.path.join(gameAssetsDirectory, "/manifest.json")
+gameAssetsDirectory = os.path.join(os.path.split(os.path.abspath(__file__))[0], "GameAssets")
+localManifest = os.path.join(gameAssetsDirectory, "manifest.json")
 
 class P2PNetwork:
 
@@ -18,6 +17,7 @@ class P2PNetwork:
         """Host a new game and start listening for incoming connections."""
         threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
         print("Hosting game...")
+        self.LoadLocalManfest()
 
     def start_game(self):
         """Start the game logic for the host after hosting the game."""
@@ -125,29 +125,29 @@ class P2PNetwork:
         await writer.drain()
 
     
-    def GenerateManifest(self, directory: str):
+    def GenerateManifest(self) -> list:
         
         manifest = {}
-        for filePath in Path(directory).rglob('*'):
+        for filePath in Path(gameAssetsDirectory).rglob('*'):
             if filePath.is_file():
                 file_size = os.path.getsize(filePath)
-                manifest[filePath.relative_to(directory).as_posix()] = str(file_size)
+                manifest[filePath.relative_to(gameAssetsDirectory).as_posix()] = str(file_size)
 
-        self.SaveLocalManifest()
+        self.SaveLocalManifest(manifest)
         return manifest
 
 
-    def LoadLocalManfest(self) -> dict:
+    def LoadLocalManfest(self) -> list:
         
         if os.path.exists(localManifest):
-            with open(localManifest, 'r') as f:
-                return json.load(f)
+            with open(localManifest, 'r') as man:
+                return json.load(man)
             
         return self.GenerateManifest()
 
 
-    def SaveLocalManifest(manifest: dict):
+    def SaveLocalManifest(self, manifest: list):
         
-        with open(localManifest, 'w') as f:
-            json.dump(manifest, f, indent=4)
+        with open(localManifest, 'w') as man:
+            json.dump(manifest, man, indent=4)
 
