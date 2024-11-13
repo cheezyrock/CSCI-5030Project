@@ -1,8 +1,10 @@
 
 import json
 import os
-import requests
 
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse
+import urllib.request
 
 class GameAssetVerification:
 	def __init__(self):
@@ -77,14 +79,15 @@ class GameAssetVerification:
 		pass
 
 class AssetManifestObject:
-	def __init__(self, fileName: str, path: str, fileSize: int, fileDate: date, remoteLink: str):
+	def __init__(self, fileName: str, path: str, fileSize: int, remoteLink: str):
 		self.fileName = fileName
 		self.path = path
 		self.fileSize = fileSize
-		self.fileDate = fileDate
 		self.remoteLink = remoteLink
 
 	def __eq__(self, other):
 		if not isinstance(other, AssetManifestObject):
 			return False
 		return self.fileName == other.fileName and self.path == other.path and self.fileSize == other.fileSize and self.fileDate == other.fileDate and self.remoteLink == other.remoteLink
+
+
