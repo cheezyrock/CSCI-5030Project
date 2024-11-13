@@ -1,10 +1,11 @@
 import os
 import json
 import asyncio
+import threading
+from tkinter import messagebox
+import socket
 from pathlib import Path
 from typing import List
-
-from GameAssetVerification import generate_manifest
 
 # Directory for storing files and manifest
 gameAssetsDirectory = os.path.join(os.getcwd(), "/GameAssets")
@@ -12,43 +13,64 @@ localManifest = os.path.join(gameAssetsDirectory, "/manifest.json")
 
 class P2PNetwork:
 
-    def __init__(self, host: str, port: int):
+    # P2P Networking Methods
+    def host_game(self):
+        """Host a new game and start listening for incoming connections."""
+        threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
+        print("Hosting game...")
 
-        self.host = host
-        self.port = port
-        self.peers: list[tuple[asyncio.StreamReader, asyncio.StreamWriter]] = []
+    def start_game(self):
+        """Start the game logic for the host after hosting the game."""
+        self.play()  # Start the game loop for the host
 
-    async def start_host(self):
-        
-        server = await asyncio.start_server(self.handle_client, self.host, self.port)
+    async def start_host_server(self):
+        """Start a server that allows players to connect."""
+        server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888)
         async with server:
-            print(f"Hosting game on {self.host}:{self.port}")
+            print(f"Hosting game on localhost:8888")
             await server.serve_forever()
 
-    async def handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        
-        self.peers.append((reader, writer))
-        print("Client connected")
-        await self.SynchronizeFiles(reader, writer)
+    async def handle_client(self, reader, writer):
+        """Handle incoming client connections and share game data."""
+        print("A player has connected.")
+        # Send the initial game state to the connected player
+        writer.write(self.current_node.text.encode())
+        await writer.drain()
 
-    async def discover_games(self) -> List[tuple[str, int]]:
-        
-        available_games = [("localhost", 8888)] 
-        return available_games
+    def show_ip_entry(self):
+        """Show the IP entry fields when joining a game."""
+        self.ip_label.pack(pady=10)
+        self.ip_entry.pack(pady=10)
+        self.ip_submit_button.pack(pady=10)
+        self.remove_main_buttons()  # Remove Host and Join buttons
 
-    async def connect_to_host(self, host: str, port: int):
-        
+    def join_game(self):
+        """Allow the user to input a host's IP and connect to an existing game."""
+        peer_ip = self.ip_entry.get()
+        if peer_ip:
+            threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
+            print(f"Attempting to join game at {peer_ip}...")
+            self.ip_label.pack_forget()  # Hide input after submitting
+            self.ip_entry.pack_forget()
+            self.ip_submit_button.pack_forget()
+            self.remove_main_buttons()  # Remove Host and Join buttons
+        else:
+            messagebox.showerror("Error", "Please enter a valid IP address.")
+
+    async def connect_to_host(self, host, port):
+        """Connect to an existing game hosted by another player."""
         try:
-            reader, writer = await asyncio.open_connection(host, port)
-            self.peers.append((reader, writer))
-            
-            await self.SynchronizeFiles(reader, writer)
-
+            reader, writer = await asyncio.wait_for( 
+                asyncio.open_connection(host, port), timeout=10)
+            game_intro = await reader.read(100)  # Receive initial story data
+            self.story_text.set(game_intro.decode())
+            self.display_choices()  # Show the story after joining
         except ConnectionRefusedError:
-            print(f"Failed to connect to {host}:{port} - No game hosted.")
-
+            messagebox.showerror("Connection Error","No game hosted at the provided IP address.")
         except Exception as e:
-            print(f"Failed to connect to {host}:{port} - {e}")
+            messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
+
+    
 
 
     async def SynchronizeFiles(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
