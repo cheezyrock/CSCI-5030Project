@@ -1,5 +1,5 @@
 name: Narative Game workflow
-run-name: Testing Github Actions for Python script
+run-name: CI/CD Narrative Game
 
 on:
   push:
@@ -26,13 +26,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install Pillow
-          pip install playsound==1.2.2
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run python Decision test script
         run: |
-           xvfb-run python -m unittest discover
+          python -m unittest TestCases.py
       
-     # - name: Run python ImageHandler test script
-     #   run: |
-     #     python -m unittest TestImageHandler.py
+      - name: Run python P2PNetwork methods test script
+        run: |
+         python -m unittest testP2PNetwork.py
+      - name: Run python  Game Hosting and Joining Connections test script
+        run: |
+          python -m unittest testHostingJoiningConnections.py
