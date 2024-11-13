@@ -31,7 +31,7 @@ class P2PNetwork:
 
     async def start_host_server(self):
         """Start a server that allows players to connect."""
-        server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888)
+        server = await asyncio.start_server(self.handle_client, '192.168.1.85', 8888)
         async with server:
             print(f"Hosting game on localhost:8888")
             await server.serve_forever()
@@ -41,7 +41,7 @@ class P2PNetwork:
         self.peers.append((reader,writer))
         print("A player has connected.")
         # Send the initial game state to the connected player
-        await self.SynchronizeFiles()
+        await self.SynchronizeFiles(reader, writer, True)
 
         writer.write(self.current_node.text.encode())
         await writer.drain()
@@ -72,10 +72,19 @@ class P2PNetwork:
     
 
 
-    async def SynchronizeFiles(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def SynchronizeFiles(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, isHost: bool = False):
         
         lm = self.LoadLocalManfest()
-        rm = await self.ReceiveManifest(reader)
+
+        if isHost:
+            await self.SendManifest(writer, lm)
+
+            remote_manifest = await self.ReceiveManifest(reader)
+
+        else:
+            remote_manifest = await self.ReceiveManifest(reader)
+
+            await self.SendManifest(writer, lm) 
         
         await self.TransferFiles(lm, rm, reader, writer)
 
