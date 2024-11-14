@@ -6,12 +6,14 @@ import Audio
 import asyncio
 import threading
 import socket
+from DecisionPoints import Player,DecisionPointsUI,GameIntegration
 
 class Game:
     def __init__(self):
         self.story = StoryBuilder.create_story()
         self.current_node = self.story
-
+        self.players = [Player(player_id=i) for i in range(1,3)]  # Example: two players
+        self.decision_manager = GameIntegration(self.players, DecisionPointsUI(self.players))
         # Set up the main window
         self.root = tk.Tk()
         self.root.title("Interactive Story Game")
@@ -70,21 +72,33 @@ class Game:
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index))
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index,player_id))
                 button.pack(pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
     def make_choice(self, index):
+        
         """Update the game state based on the player's choice."""
+        player = next((p for p in self.players if p.player_id == player_id), None)
+        if player:
+            player.record_decision(index)
+        else:
+            print(f"player with id {player_id} not found")
+            return
         self.current_node = self.current_node.choices[index]
         Audio.SFX.playSFX("ButtonPress.wav")
         self.display_choices()
+    def finalize_group_decision(self, group_decision):
+        """Process the group decision and update player decision points."""
+        self.decision_manager.handle_group_decision(group_decision)
+        # Display updated decision points for each player
+        self.decision_manager.decision_manager.display_dp()
 
     def play(self):
         """Start the game."""
-        self.display_choices()
+        self.display_choices(player_id=1)
 
     # P2P Networking Methods
     def host_game(self):
@@ -141,6 +155,9 @@ class Game:
             self.display_choices()  # Show the story after joining
         except Exception as e:
             messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
+    def show_decision_points(self):
+        """Display the decision points for each player."""
+        self.decision_manager.decision_manager.display_dp()
 
     def remove_main_buttons(self):
         """Hide the Host and Join buttons after game starts."""
@@ -154,5 +171,5 @@ class Game:
         # Here you can add logic to stop the server or close any active connections if necessary
         # For example, if you are running a server, you should properly stop it before quitting
 
-#if __name__ == "__main__":
- #   game = Game()
+if __name__ == "__main__":
+    game = Game()
