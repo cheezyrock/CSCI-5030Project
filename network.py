@@ -5,6 +5,7 @@ import threading
 from tkinter import messagebox
 import socket
 from pathlib import Path
+import Game
 
 # Directory for storing files and manifest
 gameAssetsDirectory = os.path.join(os.path.split(os.path.abspath(__file__))[0], "GameAssets")
@@ -12,7 +13,9 @@ localManifest = os.path.join(gameAssetsDirectory, "manifest.json")
 
 class P2PNetwork:
     def __init__(self):
+        #global current_node
         self.peers: list[tuple[asyncio.StreamReader, asyncio.StreamWriter]] = []
+        
 
 
     # P2P Networking Methods
@@ -31,7 +34,9 @@ class P2PNetwork:
 
     async def start_host_server(self):
         """Start a server that allows players to connect."""
-        server = await asyncio.start_server(self.handle_client, '192.168.1.85', 8888)
+        server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
+        #server = await asyncio.start_server(self.handle_client, '192.168.1.85', 8888) # Jon Testing
+        #server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888) # Jon Testing
         async with server:
             print(f"Hosting game on localhost:8888")
             await server.serve_forever()
@@ -41,9 +46,11 @@ class P2PNetwork:
         self.peers.append((reader,writer))
         print("A player has connected.")
         # Send the initial game state to the connected player
-        await self.SynchronizeFiles(reader, writer, True)
 
-        writer.write(self.current_node.text.encode())
+        # Synchronize files curretnly disabled -- program infinitely hangs somewhere with awaits between host and client
+        # await self.SynchronizeFiles(reader, writer, True)
+
+        writer.write(Game.current_node.text.encode())
         await writer.drain()
 
     def join_game(self, peer_ip):

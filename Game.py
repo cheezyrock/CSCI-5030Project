@@ -8,10 +8,13 @@ import threading
 import socket
 import network
 
+
+
 class Game:
     def __init__(self):
         self.story = StoryBuilder.create_story()
-        self.current_node = self.story
+        global current_node 
+        current_node = self.story
 
         # Set up the main window
         self.root = tk.Tk()
@@ -64,24 +67,24 @@ class Game:
         for widget in self.button_frame.winfo_children():
             widget.destroy()  # Clear existing buttons
 
-        self.story_text.set(self.current_node.text)
+        self.story_text.set(current_node.text)
 
-        if self.current_node.image_path:
-            img = ImageHandler.load_image(self.current_node.image_path)
+        if current_node.image_path:
+            img = ImageHandler.load_image(current_node.image_path)
             self.image_label.config(image=img)
             self.image_label.image = img
 
-        if self.current_node.choices:
-            for i, choice in enumerate(self.current_node.choices):
+        if current_node.choices:
+            for i, choice in enumerate(current_node.choices):
                 button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index))
                 button.pack(pady=5)
         else:
-            messagebox.showinfo("Game Over", self.current_node.text)
+            messagebox.showinfo("Game Over", current_node.text)
             self.root.quit()
 
     def make_choice(self, index):
         """Update the game state based on the player's choice."""
-        self.current_node = self.current_node.choices[index]
+        current_node = current_node.choices[index]
         Audio.SFX.playSFX("ButtonPress.mp3")
         self.display_choices()
 
