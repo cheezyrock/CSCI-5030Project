@@ -34,9 +34,9 @@ class P2PNetwork:
 
     async def start_host_server(self):
         """Start a server that allows players to connect."""
-        server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
+        #server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
         #server = await asyncio.start_server(self.handle_client, '192.168.1.85', 8888) # Jon Testing
-        #server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888) # Jon Testing
+        server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888) # Jon Testing
         async with server:
             print(f"Hosting game on localhost:8888")
             await server.serve_forever()
@@ -47,8 +47,8 @@ class P2PNetwork:
         print("A player has connected.")
         # Send the initial game state to the connected player
 
-        # Synchronize files curretnly disabled -- program infinitely hangs somewhere with awaits between host and client
-        # await self.SynchronizeFiles(reader, writer, True)
+        # Synchronize files currently disabled -- program infinitely hangs somewhere with awaits between host and client
+        #await self.SynchronizeFiles(reader, writer, True)
 
         writer.write(Game.current_node.text.encode())
         await writer.drain()
@@ -66,7 +66,8 @@ class P2PNetwork:
             reader, writer = await asyncio.wait_for( 
                 asyncio.open_connection(host, port), timeout=10)
             
-            await self.SynchronizeFiles(reader, writer)
+            # Synchronize files currently disabled -- program infinitely hangs somewhere with awaits between host and client
+            #await self.SynchronizeFiles(reader, writer)
 
             game_intro = await reader.read(100)  # Receive initial story data
             self.story_text.set(game_intro.decode())
