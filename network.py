@@ -75,18 +75,20 @@ class P2PNetwork:
     async def SynchronizeFiles(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, isHost: bool = False):
         
         lm = self.LoadLocalManfest()
+        rm = None
 
         if isHost:
             await self.SendManifest(writer, lm)
 
-            remote_manifest = await self.ReceiveManifest(reader)
+            rm = await self.ReceiveManifest(reader)
 
         else:
-            remote_manifest = await self.ReceiveManifest(reader)
+            rm = await self.ReceiveManifest(reader)
 
             await self.SendManifest(writer, lm) 
         
-        await self.TransferFiles(lm, rm, reader, writer)
+        if not isHost:
+            await self.TransferFiles(lm, rm, reader, writer)
 
     async def TransferFiles (self, lm, rm, reader, writer):
 
@@ -126,7 +128,7 @@ class P2PNetwork:
 
     async def ReceiveManifest(self, reader: asyncio.StreamReader):
         
-        data = await reader.read(1024)
+        data = await reader.read()
         manifest = json.loads(data.decode())
         return manifest
 
@@ -137,7 +139,7 @@ class P2PNetwork:
         await writer.drain()
 
     
-    def GenerateManifest(self) -> list:
+    def GenerateManifest(self) -> dict:
         
         manifest = {}
         for filePath in Path(gameAssetsDirectory).rglob('*'):
@@ -149,7 +151,7 @@ class P2PNetwork:
         return manifest
 
 
-    def LoadLocalManfest(self) -> list:
+    def LoadLocalManfest(self) -> dict:
         
         if os.path.exists(localManifest):
             with open(localManifest, 'r') as man:
@@ -158,7 +160,7 @@ class P2PNetwork:
         return {}
 
 
-    def SaveLocalManifest(self, manifest: list):
+    def SaveLocalManifest(self, manifest: dict):
         
         with open(localManifest, 'w') as man:
             json.dump(manifest, man, indent=4)
