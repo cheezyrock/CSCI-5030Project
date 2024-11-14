@@ -6,6 +6,7 @@ import Audio
 import asyncio
 import threading
 import socket
+import network
 
 class Game:
     def __init__(self):
@@ -35,9 +36,11 @@ class Game:
 
         self.image_label = tk.Label(self.root)
         self.image_label.pack()
-
+        
         # Add buttons for hosting or joining a game
-        self.host_button = tk.Button(self.root, text="Host Game", command=self.host_game, width=20)
+        global network 
+        network = network.P2PNetwork()
+        self.host_button = tk.Button(self.root, text="Host Game", command=network.host_game, width=20)
         self.join_button = tk.Button(self.root, text="Join Game", command=self.show_ip_entry, width=20)
         
         self.host_button.pack(side=tk.TOP, pady=10)
@@ -86,31 +89,10 @@ class Game:
         """Start the game."""
         self.display_choices()
 
-    # P2P Networking Methods
-    def host_game(self):
-        """Host a new game and start listening for incoming connections."""
-        threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
-        print("Hosting game...")
-        self.remove_main_buttons()  # Remove Host and Join buttons
-        self.start_game()
-
-    def start_game(self):
-        """Start the game logic for the host after hosting the game."""
-        self.play()  # Start the game loop for the host
-
-    async def start_host_server(self):
-        """Start a server that allows players to connect."""
-        server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
-        async with server:
-            print(f"Hosting game on localhost:8888")
-            await server.serve_forever()
-
-    async def handle_client(self, reader, writer):
-        """Handle incoming client connections and share game data."""
-        print("A player has connected.")
-        # Send the initial game state to the connected player
-        writer.write(self.current_node.text.encode())
-        await writer.drain()
+    def remove_main_buttons(self):
+        """Hide the Host and Join buttons after game starts."""
+        self.host_button.pack_forget()
+        self.join_button.pack_forget()
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
@@ -119,43 +101,100 @@ class Game:
         self.ip_submit_button.pack(pady=10)
         self.remove_main_buttons()  # Remove Host and Join buttons
 
-    def join_game(self):
-        """Allow the user to input a host's IP and connect to an existing game."""
-        peer_ip = self.ip_entry.get()
-        if peer_ip:
-            threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
-            print(f"Attempting to join game at {peer_ip}...")
-            self.ip_label.pack_forget()  # Hide input after submitting
-            self.ip_entry.pack_forget()
-            self.ip_submit_button.pack_forget()
-            self.remove_main_buttons()  # Remove Host and Join buttons
-        else:
-            messagebox.showerror("Error", "Please enter a valid IP address.")
-
-    async def connect_to_host(self, host, port):
-        """Connect to an existing game hosted by another player."""
-        try:
-            reader, writer = await asyncio.wait_for( 
-                asyncio.open_connection(host, port), timeout=10)
-            game_intro = await reader.read(100)  # Receive initial story data
-            self.story_text.set(game_intro.decode())
-            self.display_choices()  # Show the story after joining
-        except ConnectionRefusedError:
-            messagebox.showerror("Connection Error","No game hosted at the provided IP address.")
-        except Exception as e:
-            messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
-
-    def remove_main_buttons(self):
-        """Hide the Host and Join buttons after game starts."""
-        self.host_button.pack_forget()
-        self.join_button.pack_forget()
-
     def on_close(self):
         """Terminate the game server when closing the window."""
         print("Closing the game...")
         self.root.quit()  # Close the window
         # Here you can add logic to stop the server or close any active connections if necessary
         # For example, if you are running a server, you should properly stop it before quitting
+
+
+    def host_game(self):
+        network.host_game()
+        print("Hosting game...")
+        self.remove_main_buttons()  # Remove Host and Join buttons
+        self.start_game()
+
+    def join_game(self):
+        peer_ip = self.ip_entry.get()
+        print(f"Attempting to join game at {peer_ip}...")
+        self.ip_label.pack_forget()  # Hide input after submitting
+        self.ip_entry.pack_forget()
+        self.ip_submit_button.pack_forget()
+        self.remove_main_buttons()  # Remove Host and Join buttons
+        network.join_game(peer_ip)
+
+
+    ## P2P Networking Methods
+    #def host_game(self):
+    #    """Host a new game and start listening for incoming connections."""
+    #    threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
+    #    print("Hosting game...")
+    #    self.remove_main_buttons()  # Remove Host and Join buttons
+    #    self.start_game()
+
+    #def start_game(self):
+    #    """Start the game logic for the host after hosting the game."""
+    #    self.play()  # Start the game loop for the host
+
+    #async def start_host_server(self):
+    #    """Start a server that allows players to connect."""
+    #    server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888)
+    #    async with server:
+    #        print(f"Hosting game on localhost:8888")
+    #        await server.serve_forever()
+
+    #async def handle_client(self, reader, writer):
+    #    """Handle incoming client connections and share game data."""
+    #    print("A player has connected.")
+    #    # Send the initial game state to the connected player
+    #    writer.write(self.current_node.text.encode())
+    #    await writer.drain()
+
+    #def show_ip_entry(self):
+    #    """Show the IP entry fields when joining a game."""
+    #    self.ip_label.pack(pady=10)
+    #    self.ip_entry.pack(pady=10)
+    #    self.ip_submit_button.pack(pady=10)
+    #    self.remove_main_buttons()  # Remove Host and Join buttons
+
+    #def join_game(self):
+    #    """Allow the user to input a host's IP and connect to an existing game."""
+    #    peer_ip = self.ip_entry.get()
+    #    if peer_ip:
+    #        threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
+    #        print(f"Attempting to join game at {peer_ip}...")
+    #        self.ip_label.pack_forget()  # Hide input after submitting
+    #        self.ip_entry.pack_forget()
+    #        self.ip_submit_button.pack_forget()
+    #        self.remove_main_buttons()  # Remove Host and Join buttons
+    #    else:
+    #        messagebox.showerror("Error", "Please enter a valid IP address.")
+
+    #async def connect_to_host(self, host, port):
+    #    """Connect to an existing game hosted by another player."""
+    #    try:
+    #        reader, writer = await asyncio.wait_for( 
+    #            asyncio.open_connection(host, port), timeout=10)
+    #        game_intro = await reader.read(100)  # Receive initial story data
+    #        self.story_text.set(game_intro.decode())
+    #        self.display_choices()  # Show the story after joining
+    #    except ConnectionRefusedError:
+    #        messagebox.showerror("Connection Error","No game hosted at the provided IP address.")
+    #    except Exception as e:
+    #        messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
+
+    #def remove_main_buttons(self):
+    #    """Hide the Host and Join buttons after game starts."""
+    #    self.host_button.pack_forget()
+    #    self.join_button.pack_forget()
+
+    #def on_close(self):
+    #    """Terminate the game server when closing the window."""
+    #    print("Closing the game...")
+    #    self.root.quit()  # Close the window
+    #    # Here you can add logic to stop the server or close any active connections if necessary
+    #    # For example, if you are running a server, you should properly stop it before quitting
 
 #if __name__ == "__main__":
  #   game = Game()
