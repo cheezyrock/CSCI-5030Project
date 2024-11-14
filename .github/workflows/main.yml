@@ -12,7 +12,7 @@ on:
       - story-visuals
 
 jobs:
-  trail-python-run:
+  Run-Python-test-scripts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,3 +38,7 @@ jobs:
       - name: Run python  Game Hosting and Joining Connections test script
         run: |
           python -m unittest testHostingJoiningConnections.py
+      
+      - name: Run python  Image Display test script
+        run: |
+          python -m unittest TestImageHandler.py
