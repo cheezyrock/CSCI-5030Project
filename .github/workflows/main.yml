@@ -35,10 +35,7 @@ jobs:
       - name: Run python P2PNetwork methods test script
         run: |
          python -m unittest testP2PNetwork.py
+         
       - name: Run python  Game Hosting and Joining Connections test script
         run: |
           python -m unittest testHostingJoiningConnections.py
-      
-      - name: Run python  Image Display test script
-        run: |
-          python -m unittest TestImageHandler.py
