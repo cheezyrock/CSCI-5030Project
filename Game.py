@@ -98,7 +98,7 @@ class Game:
 
     def play(self):
         """Start the game."""
-        self.display_choices(player_id=1)
+        self.display_choices(player_id)
 
     # P2P Networking Methods
     def host_game(self):
