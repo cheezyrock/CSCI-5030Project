@@ -57,8 +57,6 @@ class Game:
         Audio.BGM.playBGM()
 
         self.root.mainloop()
-        
-        self.current_player_index = 0
 
     def display_choices(self):
         """Display the story choices for the player."""
@@ -71,28 +69,27 @@ class Game:
             img = ImageHandler.load_image(self.current_node.image_path)
             self.image_label.config(image=img)
             self.image_label.image = img
-            
-        current_player = self.players[0]
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index, self.players[0]))
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index,player_id))
                 button.pack(pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
-    def make_choice(self, index, player):
+    def make_choice(self, index):
         
         """Update the game state based on the player's choice."""
+        player = next((p for p in self.players if p.player_id == player_id), None)
         if player:
             player.record_decision(index)
-            self.current_node = self.current_node.choices[index]
-            Audio.SFX.playSFX("ButtonPress.mp3")
-            self.display_choices()
         else:
-            print(f"player with id {player.player_id} not found")
-
+            print(f"player with id {player_id} not found")
+            return
+        self.current_node = self.current_node.choices[index]
+        Audio.SFX.playSFX("ButtonPress.wav")
+        self.display_choices()
     def finalize_group_decision(self, group_decision):
         """Process the group decision and update player decision points."""
         self.decision_manager.handle_group_decision(group_decision)
