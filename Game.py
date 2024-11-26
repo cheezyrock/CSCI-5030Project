@@ -7,7 +7,7 @@ import asyncio
 import threading
 import socket
 from DecisionPoints import Player,DecisionPointsUI,GameIntegration
-
+import itertools
 class Game:
     def __init__(self):
         self.peers = []
@@ -19,14 +19,32 @@ class Game:
         self.root = tk.Tk()
         self.root.title("Interactive Story Game")
         
+        
         # Register the close event to ensure proper termination
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         self.story_text = tk.StringVar()
-
+        self.rainbow_colors = itertools.cycle(["#ff0000", "#ff7f00", "#ffff00", 
+                                               "#00ff00", "#0000ff", "#4b0082", "#9400d3"])
         # Welcome message
-        self.welcome_label = tk.Label(self.root, text="Welcome to the Interactive Story Game!", font=('Comic Sans MS', 18, 'bold'), pady=20)
-        self.welcome_label.pack()
+        
+       # self.welcome_label = tk.Label(self.root, text="Welcome to the Interactive Story Game!", font=('Comic Sans MS', 18, 'bold'), pady=20)
+       #    # Welcome message
+        self.welcome_label = tk.Label(
+            self.root,
+            text="🎉 Welcome to the Interactive Story Game! 🎉",
+            font=('Sans Comic MS', 20, 'bold'),
+            fg="#ffffff",  
+            bg="#4caf50",  
+            pady=20,
+            padx=10,
+            borderwidth=5,
+            relief="raised"  # 3D effect
+        )
+        self.welcome_label.pack(pady=20)
+ #self.welcome_label.pack()
+    # Welcome message
+
 
         # Story display label
         self.story_label = tk.Label(self.root, textvariable=self.story_text, wraplength=300)
@@ -58,6 +76,8 @@ class Game:
         Audio.BGM.playBGM()
 
         self.root.mainloop()
+
+    
 
     def display_choices(self):
         """Display the story choices for the player."""
