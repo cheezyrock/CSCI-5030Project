@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from DecisionPoints import Player, DecisionPointsUI, GameIntegration
 
 class RunDPTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):                   # sets up tests, creates players, and assigns DPs
         print("Setting up tests...")
         
         self.player1 = Player(1)
@@ -16,17 +16,17 @@ class RunDPTests(unittest.TestCase):
         self.decision_manager = Mock()
         self.game_integration = GameIntegration([self.player1, self.player2], self.decision_manager)
         
-    def test_reset_dp(self):
+    def test_reset_dp(self):            # resets number of DPs to 0
         print("Testing reset_dp...")
         self.player1.reset_dp()
         self.assertEqual(self.player1.decision_points, 0, "Decision points should be reset to 0.")
         
-    def test_award_dp(self):
+    def test_award_dp(self):            # awards a decision point to player
         print("Testing award_dp...")
         self.player1.award_dp()
         self.assertEqual(self.player1.decision_points, 7, "Decision points should be 7 after award.")
         
-    def test_spend_dp(self):
+    def test_spend_dp(self):            # spends decision points
         print("Testing spend_dp...")
         success = self.player1.spend_dp(3)
         self.assertTrue(success, "Should be able to spend 3 points.")
@@ -35,7 +35,7 @@ class RunDPTests(unittest.TestCase):
         success = self.player1.spend_dp(7)
         self.assertFalse(success, "Should not be able to spend more points than available.")
 
-    def test_ui_dp(self):
+    def test_ui_dp(self):               # displays player decision point amounts 
         print("Testing ui_dp...")
         self.ui.display_dp()
 

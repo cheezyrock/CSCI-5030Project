@@ -10,6 +10,7 @@ from DecisionPoints import Player,DecisionPointsUI,GameIntegration
 
 class Game:
     def __init__(self):
+        self.peers = []
         self.story = StoryBuilder.create_story()
         self.current_node = self.story
         self.players = [Player(player_id=i) for i in range(1,3)]  # Example: two players
@@ -24,7 +25,7 @@ class Game:
         self.story_text = tk.StringVar()
 
         # Welcome message
-        self.welcome_label = tk.Label(self.root, text="Welcome to the Interactive Story Game!", font=('Helvetica', 14), pady=20)
+        self.welcome_label = tk.Label(self.root, text="Welcome to the Interactive Story Game!", font=('Comic Sans MS', 18, 'bold'), pady=20)
         self.welcome_label.pack()
 
         # Story display label
@@ -72,13 +73,13 @@ class Game:
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index,player_id))
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index))
                 button.pack(pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
-    def make_choice(self, index):
+    def make_choice(self, index,player_id):
         
         """Update the game state based on the player's choice."""
         player = next((p for p in self.players if p.player_id == player_id), None)
@@ -98,7 +99,7 @@ class Game:
 
     def play(self):
         """Start the game."""
-        self.display_choices(player_id)
+        self.display_choices()
 
     # P2P Networking Methods
     def host_game(self):
@@ -107,8 +108,13 @@ class Game:
         print("Hosting game...")
         self.remove_main_buttons()  # Remove Host and Join buttons
         self.start_game()
-
+        asyncio.run(self.start_host_server())
+         
     def start_game(self):
+        for player in self.peers:
+            if player not in self.peers:
+                print("Player not found in peers.")
+            return
         """Start the game logic for the host after hosting the game."""
         self.play()  # Start the game loop for the host
 
@@ -118,8 +124,45 @@ class Game:
         async with server:
             print(f"Hosting game on localhost:8888")
             await server.serve_forever()
-
+    
     async def handle_client(self, reader, writer):
+    # Get the player's information (e.g., IP address or name)
+        player = writer.get_extra_info('peername')
+    
+    # Check if the player is already in the peers list
+        if player in self.peers:
+            print(f"Player {player} is already connected.")
+            return  # You could close the connection here if necessary
+    
+    # If the player is not already in peers, add them
+        self.peers.append(player)
+        print(f"Player connected: {player}")
+    
+    # Continue handling the connection (sending messages, updating game state, etc.)
+        try:
+        # Handle communication with the player
+            while True:
+                data = await reader.read(100)
+                if not data:
+                    break
+            writer.write(data)
+            await writer.drain()
+        except asyncio.CancelledError:
+            pass
+        finally:
+        # Remove player when done
+            self.peers.remove(player)
+            print(f"Player disconnected: {player}")
+            writer.close()
+            await writer.wait_closed()
+
+
+   # async def handle_client(self, reader, writer):
+   #     player = writer.get_extra_info('peername')
+   #     print(f"Player connected: {player}")
+    
+    # Add the player to the peers list
+        self.peers.append(player)
         """Handle incoming client connections and share game data."""
         print("A player has connected.")
         # Send the initial game state to the connected player
@@ -137,12 +180,15 @@ class Game:
         """Allow the user to input a host's IP and connect to an existing game."""
         peer_ip = self.ip_entry.get()
         if peer_ip:
-            threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
+           # threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
             print(f"Attempting to join game at {peer_ip}...")
             self.ip_label.pack_forget()  # Hide input after submitting
             self.ip_entry.pack_forget()
             self.ip_submit_button.pack_forget()
-            self.remove_main_buttons()  # Remove Host and Join buttons
+            self.remove_main_buttons()  
+            
+            # Remove Host and Join buttons
+            asyncio.run(self.connect_to_host(peer_ip, 8888))
         else:
             messagebox.showerror("Error", "Please enter a valid IP address.")
 
@@ -150,6 +196,9 @@ class Game:
         """Connect to an existing game hosted by another player."""
         try:
             reader, writer = await asyncio.open_connection(host, port)
+            self.peers.append((reader,writer))
+            print(f"Connected to game at {host}:{port}")
+            
             game_intro = await reader.read(100)  # Receive initial story data
             self.story_text.set(game_intro.decode())
             self.display_choices()  # Show the story after joining
