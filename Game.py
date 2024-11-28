@@ -15,6 +15,7 @@ class Game:
         self.players = [Player(player_id=i) for i in range(1,3)]  # Example: two players
         self.decision_manager = GameIntegration(self.players, DecisionPointsUI(self.players))
         self.current_player_index = 0  # Player 1 starts
+        self.player_joined = asyncio.Event()  # Wait for Player 2 to Join
         
         # Set up the main window
         self.root = tk.Tk()
@@ -58,7 +59,7 @@ class Game:
 
         Audio.BGM.playBGM()
 
-        self.root.mainloop()
+        self.root.mainloop()    
 
 
     def display_choices(self):
@@ -108,10 +109,16 @@ class Game:
     # P2P Networking Methods
     def host_game(self):
         """Host a new game and start listening for incoming connections."""
-        threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
+        # Start the server using asyncio and handle client connections
         print("Hosting game...")
-        self.remove_main_buttons()  # Remove Host and Join buttons
-        self.start_game()
+        self.remove_main_buttons()  # Hide Host and Join buttons
+        
+        # Start the host server using asyncio's event loop
+        self.root.after(100,self.start_async_server)  # This handles the connections
+
+    def start_async_server(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.start_host_server())
 
     def start_game(self):
         """Start the game logic for the host after hosting the game."""
@@ -119,10 +126,13 @@ class Game:
 
     async def start_host_server(self):
         """Start a server that allows players to connect."""
-        server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
-        async with server:
-            print(f"Hosting game on localhost:8888")
-            await server.serve_forever()
+        try:
+            server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
+            async with server:
+                print(f"Hosting game on localhost:8888")
+                await server.serve_forever()
+        except Exception as e:
+                print(f"Error starting server: {e}")
 
     async def handle_client(self, reader, writer):
         """Handle incoming client connections and share game data."""
@@ -130,6 +140,10 @@ class Game:
         # Send the initial game state to the connected player
         writer.write(self.current_node.text.encode())
         await writer.drain()
+        await reader.read(100)
+        self.player_joined.set()    # Tell Host to start game
+        await self.player_joined.wait()
+        self.start_game()
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
@@ -155,9 +169,17 @@ class Game:
         """Connect to an existing game hosted by another player."""
         try:
             reader, writer = await asyncio.open_connection(host, port)
+            self.writer = writer
+            self.reader = reader
+            
+            writer.write(b'Player 2 is ready')
+            await writer.drain()
+            
             game_intro = await reader.read(100)  # Receive initial story data
             self.story_text.set(game_intro.decode())
             self.display_choices()  # Show the story after joining
+            self.player_joined.set()
+            
         except Exception as e:
             messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
     def show_decision_points(self):
