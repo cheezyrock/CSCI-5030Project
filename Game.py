@@ -58,6 +58,8 @@ class Game:
         Audio.BGM.playBGM()
 
         self.root.mainloop()
+        
+        self.current_player_index = 0
 
     def display_choices(self):
         """Display the story choices for the player."""
@@ -73,17 +75,28 @@ class Game:
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index))
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index, self.players[0]))
                 button.pack(pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
-    def make_choice(self, index):
+    def make_choice(self, index, player):
+        
         """Update the game state based on the player's choice."""
-        self.current_node = self.current_node.choices[index]
-        Audio.SFX.playSFX("ButtonPress.mp3")
-        self.display_choices()
+        if player:
+            player.record_decision(index)
+            self.current_node = self.current_node.choices[index]
+            Audio.SFX.playSFX("ButtonPress.mp3")
+            self.display_choices()
+        else:
+            print(f"player with id {player.player_id} not found")
+
+    def finalize_group_decision(self, group_decision):
+        """Process the group decision and update player decision points."""
+        self.decision_manager.handle_group_decision(group_decision)
+        # Display updated decision points for each player
+        self.decision_manager.decision_manager.display_dp()
 
     def play(self):
         """Start the game."""
