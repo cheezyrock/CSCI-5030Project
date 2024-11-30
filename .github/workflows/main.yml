@@ -14,6 +14,7 @@ on:
 jobs:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   trail-python-run:
 =======
   Run-Python-test-scripts:
@@ -21,6 +22,9 @@ jobs:
 =======
   Run-Python-test-scripts:
 >>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
+=======
+  trail-python-run:
+>>>>>>> parent of 1a7e522 (Merge Game.py from main)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +41,7 @@ jobs:
 
       - name: Run python test script
         run: |
+<<<<<<< HEAD
 <<<<<<< HEAD
           python -m unittest TestCases.py
 =======
@@ -64,3 +69,6 @@ jobs:
           path: test.txt
         
 >>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
+=======
+          python -m unittest TestCases.py
+>>>>>>> parent of 1a7e522 (Merge Game.py from main)
