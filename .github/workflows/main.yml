@@ -13,7 +13,11 @@ on:
 
 jobs:
 <<<<<<< HEAD
+<<<<<<< HEAD
   trail-python-run:
+=======
+  Run-Python-test-scripts:
+>>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
 =======
   Run-Python-test-scripts:
 >>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
