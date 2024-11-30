@@ -12,7 +12,11 @@ on:
       - story-visuals
 
 jobs:
+<<<<<<< HEAD
   trail-python-run:
+=======
+  Run-Python-test-scripts:
+>>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,4 +33,30 @@ jobs:
 
       - name: Run python test script
         run: |
+<<<<<<< HEAD
           python -m unittest TestCases.py
+=======
+          python -m unittest TestCases.py > test.txt
+      
+      - name: Run python P2PNetwork methods test script
+        run: |
+         python -m unittest testP2PNetwork.py >> test.txt
+
+      - name: Run python  Game Hosting and Joining Connections test script
+        run: |
+          python -m unittest testHostingJoiningConnections.py >> test.txt
+        
+      - name: Run Security Audit
+        if: github.event_name == 'push' && github.ref == 'refs/head/main'
+        run: |
+          pip install pip-audit
+          pip-audit
+
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test.txt
+        
+>>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
