@@ -49,20 +49,20 @@ class Game:
        #    # Welcome message
         self.welcome_label = tk.Label(
             self.root,
-            text="🎉 Welcome to the Interactive Story Game! 🎉",
+            text="🎉 Welcome to the Interactive Story Game!!! 🎉",
             font=('Sans Comic MS', 20, 'bold'),
             fg="#ffffff",  
             bg="#000000",  
-            pady=20,
-            padx=10,
-            borderwidth=5,
-            relief="raised"  # 3D effect
+            pady=15,
+            padx=20,
+            borderwidth=8,
+            relief="ridge",
+            highlightbackground="#ffffff",  # Optional white outline for emphasis
+            highlightthickness=3,  # Thickness of the outline
+            anchor="center"# 3D effect
         )
         self.welcome_label.pack(pady=20)
         self.update_rainbow()
- #self.welcome_label.pack()
-    # Welcome message
-
 
         # Story display label
         self.story_label = tk.Label(self.root, textvariable=self.story_text, wraplength=300)
@@ -252,9 +252,10 @@ class Game:
         self.decision_manager.decision_manager.display_dp()
 
     def remove_main_buttons(self):
-        """Hide the Host and Join buttons after game starts."""
+        """Hide the welcome label, Host and Join buttons after game starts."""
         self.host_button.pack_forget()
         self.join_button.pack_forget()
+        self.welcome_label.pack_forget()
 
     def on_close(self):
         """Terminate the game server when closing the window."""
