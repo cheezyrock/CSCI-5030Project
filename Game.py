@@ -1,4 +1,5 @@
 import tkinter as tk
+import os
 from tkinter import messagebox
 from story_builder import StoryBuilder
 from image_handler import ImageHandler
@@ -8,6 +9,8 @@ import threading
 import socket
 from DecisionPoints import Player,DecisionPointsUI,GameIntegration
 import itertools
+from PIL import Image, ImageTk
+
 class Game:
     def __init__(self):
         self.peers = []
@@ -23,6 +26,20 @@ class Game:
         # Register the close event to ensure proper termination
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        bg_image_path = os.path.join("GameAssets", "images", "background.png")
+         # Load background image
+        bg_image = Image.open(bg_image_path)  # Replace with your image file
+        bg_image = bg_image.resize((1300, 1300))  # Resize to fit window
+        self.bg_photo = ImageTk.PhotoImage(bg_image)
+        
+        # Set background
+        self.bg_label = tk.Label(self.root, image=self.bg_photo)
+        self.bg_label.place(relwidth=1, relheight=1)  # Stretch to fill the window
+
+        # Create a frame for widgets to overlay on the background
+        self.widget_frame = tk.Frame(self.root, bg="#000000")  # Transparent frame
+        self.widget_frame.pack(expand=True)
+
         self.story_text = tk.StringVar()
         self.rainbow_colors = itertools.cycle(["#ff0000", "#ff7f00", "#ffff00", 
                                                "#00ff00", "#0000ff", "#4b0082", "#9400d3"])
@@ -35,13 +52,14 @@ class Game:
             text="🎉 Welcome to the Interactive Story Game! 🎉",
             font=('Sans Comic MS', 20, 'bold'),
             fg="#ffffff",  
-            bg="#4caf50",  
+            bg="#000000",  
             pady=20,
             padx=10,
             borderwidth=5,
             relief="raised"  # 3D effect
         )
         self.welcome_label.pack(pady=20)
+        self.update_rainbow()
  #self.welcome_label.pack()
     # Welcome message
 
@@ -78,7 +96,12 @@ class Game:
         self.root.mainloop()
 
     
-
+    def update_rainbow(self):
+            """Update the welcome label's text color to create a rainbow effect."""
+            self.welcome_label.config(fg=next(self.rainbow_colors))
+            self.root.after(500, self.update_rainbow)  
+        
+        
     def display_choices(self):
         """Display the story choices for the player."""
         for widget in self.button_frame.winfo_children():
