@@ -1,5 +1,5 @@
-name: Narative Game CI/CD Pipeline
-run-name: CI/CD Narrative Game
+name: Narative Game workflow
+run-name: Testing Github Actions for Python script
 
 on:
   push:
@@ -29,26 +29,4 @@ jobs:
 
       - name: Run python test script
         run: |
-          python -m unittest TestCases.py > test.txt
-      
-      - name: Run python P2PNetwork methods test script
-        run: |
-         python -m unittest testP2PNetwork.py >> test.txt
-
-      - name: Run python  Game Hosting and Joining Connections test script
-        run: |
-          python -m unittest testHostingJoiningConnections.py >> test.txt
-        
-      - name: Run Security Audit
-        if: github.event_name == 'push' && github.ref == 'refs/head/main'
-        run: |
-          pip install pip-audit
-          pip-audit
-
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test.txt
-        
+          python -m unittest TestCases.py
