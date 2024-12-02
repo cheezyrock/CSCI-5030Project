@@ -7,58 +7,63 @@ import Audio
 import asyncio
 import threading
 import socket
-from DecisionPoints import Player,DecisionPointsUI,GameIntegration
+from DecisionPoints import Player, DecisionPointsUI, GameIntegration
 import itertools
 from PIL import Image, ImageTk
 
+
 class Game:
     def __init__(self):
+        self.peers = []
         self.story = StoryBuilder.create_story()
         self.current_node = self.story
-        self.players = [Player(player_id=i) for i in range(1,3)]  # Example: two players
+        self.players = [Player(player_id=i) for i in range(1, 3)]  # Example: two players
         self.decision_manager = GameIntegration(self.players, DecisionPointsUI(self.players))
+
         # Set up the main window
         self.root = tk.Tk()
         self.root.title("Interactive Story Game")
-        
-        
-        # Register the close event to ensure proper termination
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        # Load background image
         bg_image_path = os.path.join("GameAssets", "images", "background.png")
-         # Load background image
-        bg_image = Image.open(bg_image_path)  # Replace with your image file
-        bg_image = bg_image.resize((1300, 1300))  # Resize to fit window
-        self.bg_photo = ImageTk.PhotoImage(bg_image)
-        
+        if os.path.exists(bg_image_path):
+            bg_image = Image.open(bg_image_path)
+            bg_image = bg_image.resize((1300, 1300))  # Resize to fit window
+            self.bg_photo = ImageTk.PhotoImage(bg_image)
+        else:
+            self.bg_photo = None
+            print(f"Background image not found at: {bg_image_path}")
+
         # Set background
-        self.bg_label = tk.Label(self.root, image=self.bg_photo)
+        if self.bg_photo:
+            self.bg_label = tk.Label(self.root, image=self.bg_photo)
+        else:
+            self.bg_label = tk.Label(self.root, bg="black")
         self.bg_label.place(relwidth=1, relheight=1)  # Stretch to fill the window
 
         # Create a frame for widgets to overlay on the background
-        self.widget_frame = tk.Frame(self.root, bg="#000000")  # Transparent frame
+        self.widget_frame = tk.Frame(self.root, bg="#000000")
         self.widget_frame.pack(expand=True)
 
         self.story_text = tk.StringVar()
-        self.rainbow_colors = itertools.cycle(["#ff0000", "#ff7f00", "#ffff00", 
+        self.rainbow_colors = itertools.cycle(["#ff0000", "#ff7f00", "#ffff00",
                                                "#00ff00", "#0000ff", "#4b0082", "#9400d3"])
+
         # Welcome message
-        
-       # self.welcome_label = tk.Label(self.root, text="Welcome to the Interactive Story Game!", font=('Comic Sans MS', 18, 'bold'), pady=20)
-       #    # Welcome message
         self.welcome_label = tk.Label(
             self.root,
             text="🎉 Welcome to the Interactive Story Game!!! 🎉",
-            font=('Sans Comic MS', 20, 'bold'),
-            fg="#ffffff",  
-            bg="#000000",  
+            font=('Comic Sans MS', 20, 'bold'),
+            fg="#ffffff",
+            bg="#000000",
             pady=15,
             padx=20,
             borderwidth=8,
             relief="ridge",
-            highlightbackground="#ffffff",  # Optional white outline for emphasis
-            highlightthickness=3,  # Thickness of the outline
-            anchor="center"# 3D effect
+            highlightbackground="#ffffff",
+            highlightthickness=3,
+            anchor="center"
         )
         self.welcome_label.pack(pady=20)
         self.update_rainbow()
@@ -77,7 +82,6 @@ class Game:
         # Add buttons for hosting or joining a game
         self.host_button = tk.Button(self.root, text="Host Game", command=self.host_game, width=20)
         self.join_button = tk.Button(self.root, text="Join Game", command=self.show_ip_entry, width=20)
-        
         self.host_button.pack(side=tk.TOP, pady=10)
         self.join_button.pack(side=tk.TOP, pady=10)
 
@@ -86,21 +90,19 @@ class Game:
         self.ip_entry = tk.Entry(self.root, width=20)
         self.ip_submit_button = tk.Button(self.root, text="Join", command=self.join_game)
 
-        self.ip_label.pack_forget()  # Hide initially
-        self.ip_entry.pack_forget()  # Hide initially
-        self.ip_submit_button.pack_forget()  # Hide initially
+        self.ip_label.pack_forget()
+        self.ip_entry.pack_forget()
+        self.ip_submit_button.pack_forget()
 
         Audio.BGM.playBGM()
 
         self.root.mainloop()
 
-    
     def update_rainbow(self):
-            """Update the welcome label's text color to create a rainbow effect."""
-            self.welcome_label.config(fg=next(self.rainbow_colors))
-            self.root.after(500, self.update_rainbow)  
-        
-        
+        """Update the welcome label's text color to create a rainbow effect."""
+        self.welcome_label.config(fg=next(self.rainbow_colors))
+        self.root.after(500, self.update_rainbow)
+
     def display_choices(self):
         """Display the story choices for the player."""
         for widget in self.button_frame.winfo_children():
@@ -121,47 +123,73 @@ class Game:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
-    def make_choice(self):
-        
+    def make_choice(self, index):
         """Update the game state based on the player's choice."""
-        
         self.current_node = self.current_node.choices[index]
         Audio.SFX.playSFX("ButtonPress.wav")
         self.display_choices()
+
     def finalize_group_decision(self, group_decision):
         """Process the group decision and update player decision points."""
         self.decision_manager.handle_group_decision(group_decision)
-        # Display updated decision points for each player
         self.decision_manager.decision_manager.display_dp()
 
     def play(self):
         """Start the game."""
         self.display_choices()
 
-    def remove_main_buttons(self):
-        """Hide the Host and Join buttons after game starts."""
-        self.host_button.pack_forget()
-        self.join_button.pack_forget()
+    def host_game(self):
+        """Host a new game and start listening for incoming connections."""
+        threading.Thread(target=lambda: asyncio.run(self.start_host_server())).start()
+        print("Hosting game...")
+        self.remove_main_buttons()
+        self.start_game()
+
+    def start_game(self):
+        """Start the game logic for the host after hosting the game."""
+        self.play()
+
+    async def start_host_server(self):
+        """Start a server that allows players to connect."""
+        server = await asyncio.start_server(self.handle_client, 'localhost', 8888)
+        async with server:
+            print("Hosting game on localhost:8888")
+            await server.serve_forever()
+
+    async def handle_client(self, reader, writer):
+        """Handle incoming client connections and share game data."""
+        player = writer.get_extra_info('peername')
+        if player not in self.peers:
+            self.peers.append(player)
+        print(f"Player connected: {player}")
+
+        try:
+            while True:
+                data = await reader.read(100)
+                if not data:
+                    break
+                writer.write(data)
+                await writer.drain()
+        except asyncio.CancelledError:
+            pass
+        finally:
+            self.peers.remove(player)
+            print(f"Player disconnected: {player}")
+            writer.close()
+            await writer.wait_closed()
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
         self.ip_label.pack(pady=10)
         self.ip_entry.pack(pady=10)
         self.ip_submit_button.pack(pady=10)
-        self.remove_main_buttons()  # Remove Host and Join buttons
+        self.remove_main_buttons()
 
     def join_game(self):
         """Allow the user to input a host's IP and connect to an existing game."""
         peer_ip = self.ip_entry.get()
         if peer_ip:
-           # threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
             print(f"Attempting to join game at {peer_ip}...")
-            self.ip_label.pack_forget()  # Hide input after submitting
-            self.ip_entry.pack_forget()
-            self.ip_submit_button.pack_forget()
-            self.remove_main_buttons()  
-            
-            # Remove Host and Join buttons
             asyncio.run(self.connect_to_host(peer_ip, 8888))
         else:
             messagebox.showerror("Error", "Please enter a valid IP address.")
@@ -170,17 +198,13 @@ class Game:
         """Connect to an existing game hosted by another player."""
         try:
             reader, writer = await asyncio.open_connection(host, port)
-            self.peers.append((reader,writer))
+            self.peers.append((reader, writer))
             print(f"Connected to game at {host}:{port}")
-            
-            game_intro = await reader.read(100)  # Receive initial story data
+            game_intro = await reader.read(100)
             self.story_text.set(game_intro.decode())
-            self.display_choices()  # Show the story after joining
+            self.display_choices()
         except Exception as e:
             messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
-    def show_decision_points(self):
-        """Display the decision points for each player."""
-        self.decision_manager.decision_manager.display_dp()
 
     def remove_main_buttons(self):
         """Hide the welcome label, Host and Join buttons after game starts."""
@@ -191,97 +215,8 @@ class Game:
     def on_close(self):
         """Terminate the game server when closing the window."""
         print("Closing the game...")
-        self.root.quit()  # Close the window
-        # Here you can add logic to stop the server or close any active connections if necessary
-        # For example, if you are running a server, you should properly stop it before quitting
+        self.root.quit()
 
 
-    def host_game(self):
-        network.host_game()
-        print("Hosting game...")
-        self.remove_main_buttons()  # Remove Host and Join buttons
-        self.start_game()
-
-    def join_game(self):
-        peer_ip = self.ip_entry.get()
-        print(f"Attempting to join game at {peer_ip}...")
-        self.ip_label.pack_forget()  # Hide input after submitting
-        self.ip_entry.pack_forget()
-        self.ip_submit_button.pack_forget()
-        self.remove_main_buttons()  # Remove Host and Join buttons
-        network.join_game(peer_ip)
-
-
-    ## P2P Networking Methods
-    #def host_game(self):
-    #    """Host a new game and start listening for incoming connections."""
-    #    threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
-    #    print("Hosting game...")
-    #    self.remove_main_buttons()  # Remove Host and Join buttons
-    #    self.start_game()
-
-    #def start_game(self):
-    #    """Start the game logic for the host after hosting the game."""
-    #    self.play()  # Start the game loop for the host
-
-    #async def start_host_server(self):
-    #    """Start a server that allows players to connect."""
-    #    server = await asyncio.start_server(self.handle_client, '192.168.1.244', 8888)
-    #    async with server:
-    #        print(f"Hosting game on localhost:8888")
-    #        await server.serve_forever()
-
-    #async def handle_client(self, reader, writer):
-    #    """Handle incoming client connections and share game data."""
-    #    print("A player has connected.")
-    #    # Send the initial game state to the connected player
-    #    writer.write(self.current_node.text.encode())
-    #    await writer.drain()
-
-    #def show_ip_entry(self):
-    #    """Show the IP entry fields when joining a game."""
-    #    self.ip_label.pack(pady=10)
-    #    self.ip_entry.pack(pady=10)
-    #    self.ip_submit_button.pack(pady=10)
-    #    self.remove_main_buttons()  # Remove Host and Join buttons
-
-    #def join_game(self):
-    #    """Allow the user to input a host's IP and connect to an existing game."""
-    #    peer_ip = self.ip_entry.get()
-    #    if peer_ip:
-    #        threading.Thread(target=asyncio.run, args=(self.connect_to_host(peer_ip, 8888),)).start()
-    #        print(f"Attempting to join game at {peer_ip}...")
-    #        self.ip_label.pack_forget()  # Hide input after submitting
-    #        self.ip_entry.pack_forget()
-    #        self.ip_submit_button.pack_forget()
-    #        self.remove_main_buttons()  # Remove Host and Join buttons
-    #    else:
-    #        messagebox.showerror("Error", "Please enter a valid IP address.")
-
-    #async def connect_to_host(self, host, port):
-    #    """Connect to an existing game hosted by another player."""
-    #    try:
-    #        reader, writer = await asyncio.wait_for( 
-    #            asyncio.open_connection(host, port), timeout=10)
-    #        game_intro = await reader.read(100)  # Receive initial story data
-    #        self.story_text.set(game_intro.decode())
-    #        self.display_choices()  # Show the story after joining
-    #    except ConnectionRefusedError:
-    #        messagebox.showerror("Connection Error","No game hosted at the provided IP address.")
-    #    except Exception as e:
-    #        messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
-
-    #def remove_main_buttons(self):
-    #    """Hide the Host and Join buttons after game starts."""
-    #    self.host_button.pack_forget()
-    #    self.join_button.pack_forget()
-
-    #def on_close(self):
-    #    """Terminate the game server when closing the window."""
-    #    print("Closing the game...")
-    #    self.root.quit()  # Close the window
-    #    # Here you can add logic to stop the server or close any active connections if necessary
-    #    # For example, if you are running a server, you should properly stop it before quitting
-
-#if __name__ == "__main__":
- #   game = Game()
+if __name__ == "__main__":
+    game = Game()
