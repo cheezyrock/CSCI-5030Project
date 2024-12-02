@@ -122,15 +122,10 @@ class Game:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
-    def make_choice(self, index,player_id):
+    def make_choice(self):
         
         """Update the game state based on the player's choice."""
-        player = next((p for p in self.players if p.player_id == player_id), None)
-        if player:
-            player.record_decision(index)
-        else:
-            print(f"player with id {player_id} not found")
-            return
+        
         self.current_node = self.current_node.choices[index]
         Audio.SFX.playSFX("ButtonPress.wav")
         self.display_choices()
