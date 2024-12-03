@@ -54,7 +54,7 @@ class Game:
         self.welcome_label = tk.Label(
             self.root,
             text="🎉 Welcome to the Interactive Story Game!!! 🎉",
-            font=('Comic Sans MS', 20, 'bold'),
+            font=('Luckiest Guy', 20, 'bold'),
             fg="#ffffff",
             bg="#000000",
             pady=15,
@@ -79,11 +79,36 @@ class Game:
         self.image_label = tk.Label(self.root)
         self.image_label.pack()
 
-        # Add buttons for hosting or joining a game
-        self.host_button = tk.Button(self.root, text="Host Game", command=self.host_game, width=20)
-        self.join_button = tk.Button(self.root, text="Join Game", command=self.show_ip_entry, width=20)
-        self.host_button.pack(side=tk.TOP, pady=10)
-        self.join_button.pack(side=tk.TOP, pady=10)
+       # Add buttons for hosting or joining a game
+        self.host_button = tk.Button(
+            self.root,
+            text="Host Game",
+            command=self.host_game,
+            width=20,
+            height=1,
+            font=('Luckiest Guy', 16, 'bold'),  # Larger and bold font
+            bg="#000000",  
+            fg="#2196f3",  # White text
+            relief="raised",  # Raised 3D effect
+            borderwidth=3  # Add border width
+)
+
+        self.join_button = tk.Button(
+            self.root,
+            text="Join Game",
+            command=self.show_ip_entry,
+            width=20,
+            height=1,  # Increase height
+            font=('Luckiest Guy', 16, 'bold'),  # Larger and bold font
+            bg="#000000",  
+            fg="#2196f3",  
+            relief="raised",  
+            borderwidth=3  
+)
+
+        self.host_button.pack(side=tk.TOP, pady=20)  # Adjust padding
+        self.join_button.pack(side=tk.TOP, pady=20)  # Adjust padding
+
 
         # Create an IP address entry field (hidden by default)
         self.ip_label = tk.Label(self.root, text="Enter Host IP Address:")
@@ -137,9 +162,21 @@ class Game:
     def play(self):
         """Start the game."""
         self.display_choices()
-
+        
+    def change_background_to_black(self):
+        """Change the root window's background to black and update widgets."""
+        self.root.config(bg="black")  
+        self.bg_label.config(bg="black", image="") 
+        self.widget_frame.config(bg="black")  
+        self.story_label.config(bg="black", fg="white") 
+        self.image_label.config(bg="black")  
+        self.ip_label.config(bg="black", fg="white")    
+        self.ip_entry.config(bg="black", fg="white", insertbackground="white") 
+        self.ip_submit_button.config(bg="black", fg="white")
+    
     def host_game(self):
         """Host a new game and start listening for incoming connections."""
+        self.change_background_to_black()
         threading.Thread(target=lambda: asyncio.run(self.start_host_server())).start()
         print("Hosting game...")
         self.remove_main_buttons()
@@ -148,6 +185,7 @@ class Game:
     def start_game(self):
         """Start the game logic for the host after hosting the game."""
         self.play()
+       # self.change_background_to_black()
 
     async def start_host_server(self):
         """Start a server that allows players to connect."""
@@ -180,6 +218,7 @@ class Game:
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
+        self.change_background_to_black()
         self.ip_label.pack(pady=10)
         self.ip_entry.pack(pady=10)
         self.ip_submit_button.pack(pady=10)
