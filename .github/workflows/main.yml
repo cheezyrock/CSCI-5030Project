@@ -1,5 +1,5 @@
 name: Narative Game workflow
-run-name: Testing Github Actions for Python script
+run-name: CI/CD Narrative Game
 
 on:
   push:
@@ -12,63 +12,29 @@ on:
       - story-visuals
 
 jobs:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   trail-python-run:
-=======
-  Run-Python-test-scripts:
->>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
-=======
-  Run-Python-test-scripts:
->>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
-=======
-  trail-python-run:
->>>>>>> parent of 1a7e522 (Merge Game.py from main)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
+      
         with:
-          python-version: '3.x'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run python test script
+      - name: Run python Decision test script
         run: |
-<<<<<<< HEAD
-<<<<<<< HEAD
           python -m unittest TestCases.py
-=======
-          python -m unittest TestCases.py > test.txt
       
       - name: Run python P2PNetwork methods test script
         run: |
-         python -m unittest testP2PNetwork.py >> test.txt
-
+         python -m unittest testP2PNetwork.py
       - name: Run python  Game Hosting and Joining Connections test script
         run: |
-          python -m unittest testHostingJoiningConnections.py >> test.txt
-        
-      - name: Run Security Audit
-        if: github.event_name == 'push' && github.ref == 'refs/head/main'
-        run: |
-          pip install pip-audit
-          pip-audit
-
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: test.txt
-        
->>>>>>> parent of 3b26c97 (corrected a mistake and updated job name)
-=======
-          python -m unittest TestCases.py
->>>>>>> parent of 1a7e522 (Merge Game.py from main)
+          python -m unittest testHostingJoiningConnections.py
