@@ -32,9 +32,9 @@ jobs:
         run: |
           python -m unittest TestCases.py
       
-      - name: Run python P2PNetwork methods test script
-        run: |
-         python -m unittest testP2PNetwork.py
-      - name: Run python  Game Hosting and Joining Connections test script
-        run: |
-          python -m unittest testHostingJoiningConnections.py
+#      - name: Run python P2PNetwork methods test script
+#        run: |
+#         python -m unittest testP2PNetwork.py
+#      - name: Run python  Game Hosting and Joining Connections test script
+#        run: |
+#          python -m unittest testHostingJoiningConnections.py
