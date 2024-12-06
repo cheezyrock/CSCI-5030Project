@@ -27,7 +27,6 @@ COPY network.py  .
 COPY story_builder.py  .
 COPY story_node.py  .
 COPY TestCases.py  .
-COPY testHostingJoiningConnections.py  .
 COPY TestImageHandler.py  .
 COPY testP2PNetwork.py  .
 # run
