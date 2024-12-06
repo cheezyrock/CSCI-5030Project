@@ -139,10 +139,6 @@ class Game:
         print("A player has connected.")
         # Send the initial game state to the connected player
         writer.write(self.current_node.text.encode())
-        await writer.drain()
-        await reader.read(100)
-        self.player_joined.set()    # Tell Host to start game
-        await self.player_joined.wait()
         self.start_game()
 
     def show_ip_entry(self):
