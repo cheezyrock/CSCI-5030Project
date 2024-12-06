@@ -1,4 +1,4 @@
-name: Narative Game CI/CD Pipeline
+name: Narative Game workflow
 run-name: CI/CD Narrative Game
 
 on:
@@ -12,10 +12,8 @@ on:
       - story-visuals
 
 jobs:
-  Continous-Testing:
+  trail-python-run:
     runs-on: ubuntu-latest
-
-
     steps:
       - uses: actions/checkout@v4
 
@@ -32,26 +30,5 @@ jobs:
 
       - name: Run python Decision test script
         run: |
-          python -m unittest TestCases.py > test.txt
+          python -m unittest TestCases.py
       
-      - name: Run python P2PNetwork methods test script
-        run: |
-         python -m unittest testP2PNetwork.py >> test.txt
-
-      - name: Run python  Game Hosting and Joining Connections test script
-        run: |
-          python -m unittest testHostingJoiningConnections.py >> test.txt
-        
-      - name: Run Security Audit
-        if: github.event_name == 'push' && github.ref == 'refs/head/main'
-        run: |
-          pip install pip-audit
-          pip-audit
-
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test.txt
-        

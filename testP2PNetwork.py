@@ -1,14 +1,14 @@
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch
-from network import P2PNetwork
+from Game import Game
 
 
 class TestP2PNetwork(unittest.TestCase):
     def setUp(self):
         self.host = 'localhost'
         self.port = 8888
-        self.network = P2PNetwork(self.host, self.port)
+        self.network = Game()
 
 #testcase for starting server successfully
     @patch('asyncio.start_server', new_callable=AsyncMock)
@@ -55,5 +55,3 @@ class TestP2PNetwork(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
