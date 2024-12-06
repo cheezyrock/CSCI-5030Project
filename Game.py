@@ -6,14 +6,13 @@ import Audio
 import asyncio
 import threading
 import socket
-import time
-from DecisionPoints import Player,DecisionPointsUI,GameIntegration
+from DecisionPoints import Player, DecisionPointsUI, GameIntegration
 
 class Game:
     def __init__(self):
         self.story = StoryBuilder.create_story()
         self.current_node = self.story
-        self.players = [Player(player_id=i) for i in range(1,3)]  # Example: two players
+        self.players = [Player(player_id=i) for i in range(1, 3)]  # Example: two players
         self.decision_manager = GameIntegration(self.players, DecisionPointsUI(self.players))
         self.current_player_index = 0  # Player 1 starts
         
@@ -59,6 +58,9 @@ class Game:
 
         Audio.BGM.playBGM()
 
+        # Track connected players
+        self.connected_players = []
+
         self.root.mainloop()
 
     def display_choices(self):
@@ -76,14 +78,13 @@ class Game:
         if self.current_node.choices:
             current_player = self.players[self.current_player_index]  # Gets current player
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index,current_player.player_id))
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index, current_player.player_id))
                 button.pack(pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
 
     def make_choice(self, index, player_id):
-
         """Update the game state based on the player's choice."""
         player = next((p for p in self.players if p.player_id == player_id), None)
         if player:
@@ -111,7 +112,6 @@ class Game:
         threading.Thread(target=asyncio.run, args=(self.start_host_server(),)).start()
         print("Hosting game...")
         self.remove_main_buttons()  # Remove Host and Join buttons
-        self.start_game()
 
     def start_game(self):
         """Start the game logic for the host after hosting the game."""
@@ -127,9 +127,14 @@ class Game:
     async def handle_client(self, reader, writer):
         """Handle incoming client connections and share game data."""
         print("A player has connected.")
+        self.connected_players.append(writer)  # Add the connected player to the list
+
         # Send the initial game state to the connected player
         writer.write(self.current_node.text.encode())
         await writer.drain()
+
+        # Call check to see if both players are connected
+        self.start_game()
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
@@ -151,7 +156,6 @@ class Game:
         else:
             messagebox.showerror("Error", "Please enter a valid IP address.")
 
-
     async def connect_to_host(self, host, port):
         """Connect to an existing game hosted by another player."""
         try:
@@ -161,9 +165,6 @@ class Game:
             self.display_choices()  # Show the story after joining
         except Exception as e:
             messagebox.showerror("Connection Error", f"Failed to connect to the game: {e}")
-    def show_decision_points(self):
-        """Display the decision points for each player."""
-        self.decision_manager.decision_manager.display_dp()
 
     def remove_main_buttons(self):
         """Hide the Host and Join buttons after game starts."""
