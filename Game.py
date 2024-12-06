@@ -223,6 +223,7 @@ class Game:
             self.ip_entry.pack_forget()
             self.ip_submit_button.pack_forget()
             self.remove_main_buttons()  # Remove Host and Join buttons
+            self.change_background_to_black()
         else:
             messagebox.showerror("Error", "Please enter a valid IP address.")
 
