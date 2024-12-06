@@ -10,7 +10,7 @@ import socket
 from DecisionPoints import Player, DecisionPointsUI, GameIntegration
 import itertools
 from PIL import Image, ImageTk
-
+from tkinter import font as tkfont
 
 class Game:
     def __init__(self):
@@ -19,12 +19,17 @@ class Game:
         self.current_node = self.story
         self.players = [Player(player_id=i) for i in range(1, 3)]  # Example: two players
         self.decision_manager = GameIntegration(self.players, DecisionPointsUI(self.players))
-
+        self.story_font = ('Luckiest Guy', 20, 'bold')
+        self.choice_font = ('Luckiest Guy', 15, 'bold')
+        
         # Set up the main window
         self.root = tk.Tk()
+        self.button_frame = tk.Frame(self.root)
+        self.button_frame.pack(pady=20)
         self.root.title("Interactive Story Game")
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
+        self.root.minsize(400, 400)
+        
         # Load background image
         bg_image_path = os.path.join("GameAssets", "images", "background.png")
         if os.path.exists(bg_image_path):
@@ -36,6 +41,7 @@ class Game:
             print(f"Background image not found at: {bg_image_path}")
 
         # Set background
+        
         if self.bg_photo:
             self.bg_label = tk.Label(self.root, image=self.bg_photo)
         else:
@@ -54,7 +60,7 @@ class Game:
         self.welcome_label = tk.Label(
             self.root,
             text="🎉 Welcome to the Interactive Story Game!!! 🎉",
-            font=('Comic Sans MS', 20, 'bold'),
+            font=('Luckiest Guy', 20, 'bold'),
             fg="#ffffff",
             bg="#000000",
             pady=15,
@@ -69,8 +75,8 @@ class Game:
         self.update_rainbow()
 
         # Story display label
-        self.story_label = tk.Label(self.root, textvariable=self.story_text, wraplength=300)
-        self.story_label.pack(pady=20)
+        self.story_label = tk.Label(self.root, textvariable=self.story_text, wraplength=300, font=self.story_font,pady=10)
+        self.story_label.pack(pady=10)
 
         # Button frame
         self.button_frame = tk.Frame(self.root)
@@ -79,15 +85,16 @@ class Game:
         self.image_label = tk.Label(self.root)
         self.image_label.pack()
 
-        # Add buttons for hosting or joining a game
-        self.host_button = tk.Button(self.root, text="Host Game", command=self.host_game, width=20)
-        self.join_button = tk.Button(self.root, text="Join Game", command=self.show_ip_entry, width=20)
-        self.host_button.pack(side=tk.TOP, pady=10)
-        self.join_button.pack(side=tk.TOP, pady=10)
+       # Add buttons for hosting or joining a game
+        self.host_button = self.style_button("Host Game", self.host_game)
+        self.join_button = self.style_button("Join Game", self.show_ip_entry)
+        
+        self.host_button.pack(side=tk.TOP, pady=20)  
+        self.join_button.pack(side=tk.TOP, pady=20)  
 
         # Create an IP address entry field (hidden by default)
-        self.ip_label = tk.Label(self.root, text="Enter Host IP Address:")
-        self.ip_entry = tk.Entry(self.root, width=20)
+        self.ip_label = tk.Label(self.root, text="Enter Host IP Address:",font=self.story_font)
+        self.ip_entry = tk.Entry(self.root, width=20,font=self.story_font)
         self.ip_submit_button = tk.Button(self.root, text="Join", command=self.join_game)
 
         self.ip_label.pack_forget()
@@ -97,6 +104,23 @@ class Game:
         Audio.BGM.playBGM()
 
         self.root.mainloop()
+
+    
+    
+    def style_button(self, text, command, width=20, height=1, font=('Luckiest Guy', 16, 'bold'), bg="#000000", fg="#2196f3"):
+        """Helper function to style buttons consistently."""
+        return tk.Button(
+            self.root,
+            text=text,
+            command=command,
+            width=width,
+            height=height,
+            font=font,
+            bg=bg,
+            fg=fg,
+            relief="raised",
+            borderwidth=3
+        )
 
     def update_rainbow(self):
         """Update the welcome label's text color to create a rainbow effect."""
@@ -117,8 +141,9 @@ class Game:
 
         if self.current_node.choices:
             for i, choice in enumerate(self.current_node.choices):
-                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index))
-                button.pack(pady=5)
+                button = tk.Button(self.button_frame, text=choice.text, command=lambda index=i: self.make_choice(index),font=self.choice_font, bg="#000000",  
+            fg="#2196f3")
+                button.pack(side=tk.LEFT, padx=5, pady=5)
         else:
             messagebox.showinfo("Game Over", self.current_node.text)
             self.root.quit()
@@ -137,9 +162,21 @@ class Game:
     def play(self):
         """Start the game."""
         self.display_choices()
-
+        
+    def change_background_to_black(self):
+        """Change the root window's background to black and update widgets."""
+        self.root.config(bg="black")  
+        self.bg_label.config(bg="black", image="") 
+        self.widget_frame.config(bg="black")  
+        self.story_label.config(bg="black", fg="white") 
+        self.image_label.config(bg="black")  
+        self.ip_label.config(bg="black", fg="white")    
+        self.ip_entry.config(bg="black", fg="white", insertbackground="white") 
+        self.ip_submit_button.config(bg="black", fg="white")
+    
     def host_game(self):
         """Host a new game and start listening for incoming connections."""
+        self.change_background_to_black()
         threading.Thread(target=lambda: asyncio.run(self.start_host_server())).start()
         print("Hosting game...")
         self.remove_main_buttons()
@@ -180,11 +217,13 @@ class Game:
 
     def show_ip_entry(self):
         """Show the IP entry fields when joining a game."""
+        
+        self.ip_submit_button = self.style_button("Join Game", self.join_game)
         self.ip_label.pack(pady=10)
         self.ip_entry.pack(pady=10)
         self.ip_submit_button.pack(pady=10)
         self.remove_main_buttons()
-
+        
     def join_game(self):
         """Allow the user to input a host's IP and connect to an existing game."""
         peer_ip = self.ip_entry.get()
